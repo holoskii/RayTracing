@@ -3,12 +3,11 @@
 #include <cstring>
 
 WLM::WLM(Config& config) :
-mConfig(config),
-mCore(config),
-mWorkersReady(mConfig.threadsCount),
-mStatus(Status::Fill),
-mLineIndex(0)
-{
+        mConfig(config),
+        mCore(config),
+        mWorkersReady(mConfig.threadsCount),
+        mStatus(Status::Fill),
+        mLineIndex(0) {
     mImageBuffer = new pixel[mConfig.renderWidth * mConfig.renderHeight];
     mCore.setBuffer(mImageBuffer);
     for(int i = 0; i < mConfig.threadsCount; i++) {

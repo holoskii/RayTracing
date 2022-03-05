@@ -1,10 +1,26 @@
 #include "Objects.h"
 
-/*
+#include "Camera.h"
 
+#include <glm/gtx/string_cast.hpp>
 
 void objectTest() {
-    https://learnopengl.com/Getting-started/Camera
+    Camera cam;
+//    std::cout << glm::to_string(cam.lookDir) << '\n';
+//    std::cout << glm::to_string(cam.rightVec) << '\n';
+//    std::cout << glm::to_string(cam.upVec) << '\n';
+
+    /*Config config;
+
+
+    std::cout << glm::to_string(cam.getRay(config, 1.0f, 1.0f).mDir) << '\n';
+    std::cout << glm::to_string(cam.getRay(config, 1.0f, -1.0f).mDir) << '\n';
+    std::cout << glm::to_string(cam.getRay(config, 0.0f, 1.0f).mDir) << '\n';
+    std::cout << glm::to_string(cam.getRay(config, 0.0f, -1.0f).mDir) << '\n';
+    */
+
+
+    /*https://learnopengl.com/Getting-started/Camera
     float xRot = pi / 4;
     float yRot = pi / 2;
 
@@ -26,10 +42,10 @@ void objectTest() {
     vec4 dir = {0, 0, -1, 1};
     std::cout << glm::to_string(resultMat * dir) << '\n';
 
-
+    */
 }
 
-*/
+
 
 /*
 

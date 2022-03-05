@@ -1,12 +1,9 @@
 #include "Application.h"
 
+#include "Objects.h"
 
-int main(int, char**)
-{
-    //objectTest();
-    //return 0;
-
-    // git check
+int main(int, char**) {
+    objectTest();
 
     Application app;
     app.start();

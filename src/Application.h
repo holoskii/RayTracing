@@ -10,14 +10,12 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
 
 class Application {
 public:
     Application();
-    void start();
     ~Application();
+    void start();
 
 private:
     void startUnsafe();
@@ -33,9 +31,9 @@ private:
 private:
     Config                      mConfig;
     WLM                         mWLM;
-    GLFWwindow *                mWindowGLFW = nullptr;
-    GLuint                      mOpenGLTexture = 0;
+    GLFWwindow *                mWindowGLFW             = nullptr;
+    GLuint                      mOpenGLTexture          = 0;
     TimePoint                   mBufferUpdateTimePoint;
-    bool                        mRestartRender = false;
-    RenderMode                  mNewRenderMode = RenderMode::Fast;
+    bool                        mRestartRender          = false;
+    RenderMode                  mNewRenderMode          = RenderMode::Fast;
 };

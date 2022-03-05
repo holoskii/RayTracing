@@ -9,7 +9,7 @@
 
 class Timer {
 public:
-#if USE_TIMERS
+#if ENABLE_TIMERS
     explicit Timer(const std::string&& name)
         : mName(name)
         , mStart(std::chrono::high_resolution_clock::now()) {}

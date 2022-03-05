@@ -1,14 +1,19 @@
 #include "Application.h"
+#include "Timer.h"
 
 #include <iostream>
 #include <sstream>
 
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
+
 Application::Application() :
         mConfig(),
-        mWLM(mConfig)
-{}
+        mWLM(mConfig) {}
 
 void Application::start() {
+    TRACEME
     try {
         startUnsafe();
     }
@@ -18,6 +23,7 @@ void Application::start() {
 }
 
 Application::~Application() {
+    TRACEME
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -51,6 +57,7 @@ void Application::setup() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
+
     mWindowGLFW = glfwCreateWindow(mConfig.windowWidth, mConfig.windowHeight, "ThesisWindow", nullptr, nullptr);
     if (mWindowGLFW == nullptr)
         throw std::runtime_error("glfwCreateWindow == null");
@@ -71,6 +78,21 @@ void Application::setup() {
     io.Fonts->AddFontDefault(font->ConfigData);
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    glGenTextures(1, &mOpenGLTexture);
+
+    glBindTexture(GL_TEXTURE_2D, mOpenGLTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    // replace with glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mConfig.renderWidth, mConfig.renderHeight,
+                    0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
 };
 
 void Application::setupGUI() {
@@ -130,22 +152,15 @@ void Application::handleCore() {
 }
 
 void Application::showBuffer() {
+    TRACEME
     if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime)) {
-        glGenTextures(1, &mOpenGLTexture);
-        glBindTexture(GL_TEXTURE_2D, mOpenGLTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mConfig.renderWidth, mConfig.renderHeight,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t)mConfig.renderWidth, (int32_t)mConfig.renderHeight,
                      0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
     }
 }
 
 void Application::renderGUI() {
+    TRACEME
     ImGui::Render();
     int displayWidth, displayHeight;
     glfwGetFramebufferSize(mWindowGLFW, &displayWidth, &displayHeight);
