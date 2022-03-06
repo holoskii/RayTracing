@@ -12,14 +12,12 @@ RenderCore::RenderCore(Config& config, Scene& scene) :
 void RenderCore::renderTile(Tile & tile, bool & running) {
     assert(running);
     assert(mImageBuffer);
-    uint32_t & width = mConfig.renderWidth;
-    uint32_t & height = mConfig.renderHeight;
     if(mConfig.renderMode == RenderMode::Fast) {
         for(int i = tile.yStart; i < tile.yEnd && running; i++) {
             for(int j = tile.xStart; j < tile.xEnd && running; j++) {
-                mImageBuffer[(i * width + j)] = {
-                        (uint8_t) (255 * i / height),
-                        (uint8_t) (255 * j / width),
+                mImageBuffer[(i * mConfig.renderWidth + j)] = {
+                        (uint8_t) (255 * i / mConfig.renderHeight),
+                        (uint8_t) (255 * j / mConfig.renderWidth),
                         (uint8_t) 0,
                         (uint8_t) 255
                 };
@@ -32,7 +30,7 @@ void RenderCore::renderTile(Tile & tile, bool & running) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
             for(int j = tile.xStart; j < tile.xEnd && running; j++) {
                 long sum = 0;
-                mImageBuffer[(i * width + j)] = {
+                mImageBuffer[(i * mConfig.renderWidth + j)] = {
                         (uint8_t)  (rand() % 255),
                         (uint8_t) (rand() % 255),
                         (uint8_t) (rand() % 255),
@@ -42,12 +40,9 @@ void RenderCore::renderTile(Tile & tile, bool & running) {
         }
     }
     else {
-
-
-
         for(uint32_t i = tile.yStart; i < tile.yEnd && running; i++) {
             for(uint32_t j = tile.xStart; j < tile.xEnd && running; j++) {
-                mImageBuffer[(i * width + j)] = mScene.getPixel(j, i);
+                mImageBuffer[(i * mConfig.renderWidth + j)] = mScene.getPixel(j, i);
             }
         }
     }

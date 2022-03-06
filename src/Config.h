@@ -17,15 +17,16 @@ static std::string RenderModeString(RenderMode renderMode) {
 
 class Config {
 public:
+    RenderMode  renderMode      = RenderMode::Advanced;
+
     const char  fontPath[128]    = "../../3rdParty/imgui/misc/fonts/DroidSans.ttf";
     float       fontSize        = 16.0f;
     float       fontScale       = 2.0f;
-    RenderMode  renderMode      = RenderMode::Advanced;
     glm::vec4   backGroundColor = { 0.45f, 0.55f, 0.60f, 1.00f };
     uint32_t    windowWidth     = 1920;
     uint32_t    windowHeight    = 1080;
-    uint32_t    renderWidth     = 1920;
-    uint32_t    renderHeight    = 1080;
+    uint32_t    renderWidth     = 1920 * 4;
+    uint32_t    renderHeight    = 1080 * 4;
     uint32_t    frameUpdateTime = 30;
     uint32_t    threadsCount    = 30;
     uint32_t    tileSize        = 128;

@@ -12,8 +12,10 @@ public:
     Application();
     ~Application();
     void start();
+    void benchmark();
 
 private:
+    void shutdown();
     void startUnsafe();
     bool isRunning();
     void setup();
@@ -33,4 +35,5 @@ private:
     TimePoint                   mBufferUpdateTimePoint;
     bool                        mRestartRender          = false;
     RenderMode                  mNewRenderMode          = RenderMode::Fast;
+    bool                        mShutdown               = false;
 };

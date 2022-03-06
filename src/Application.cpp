@@ -24,14 +24,22 @@ void Application::start() {
     }
 }
 
-Application::~Application() {
+
+void Application::shutdown() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(mWindowGLFW);
     glfwTerminate();
+    mShutdown = true;
 }
+
+void Application::benchmark() {
+    mWLM.benchmarkRender();
+}
+
+Application::~Application() {}
 
 void Application::startUnsafe() {
     setup();
@@ -42,6 +50,8 @@ void Application::startUnsafe() {
         showBuffer();
         renderGUI();
     }
+
+    shutdown();
 }
 
 bool Application::isRunning() {
@@ -164,7 +174,7 @@ void Application::renderGUI() {
     int displayWidth, displayHeight;
     glfwGetFramebufferSize(mWindowGLFW, &displayWidth, &displayHeight);
     glViewport(0, 0, displayWidth, displayHeight);
-    vec4& v = mConfig.backGroundColor;
+    vec4 v = mConfig.backGroundColor;
     const ImVec4& bgCol = { v.x, v.y, v.z, v.w };
     glClearColor(bgCol.x, bgCol.y, bgCol.z, bgCol.w);
     glClear(GL_COLOR_BUFFER_BIT);

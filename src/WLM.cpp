@@ -1,5 +1,6 @@
 #include "WLM.h"
 
+#include "Timer.h"
 #include <cstring>
 
 WLM::WLM(Config& config, Scene& scene) :
@@ -40,6 +41,51 @@ void WLM::restartRender() {
     // this code should execute in new thread to avoid blocking main thread
     startNewState(Status::Fill);
     startNewState(Status::Render);
+}
+
+void WLM::benchmarkRender() {
+    std::cout << "Benchmark warming up\n";
+    // Warmup for 500ms
+    auto start = std::chrono::high_resolution_clock::now();
+    while(true) {
+        startNewState(Status::Render);
+        managerWait();
+        startNewState(Status::Fill);
+        auto end = std::chrono::high_resolution_clock::now();
+        int64_t res = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if(res > 500) {
+            break;
+        }
+    }
+    std::cout << "Benchmark started\n";
+    // Collect data
+    uint64_t min = UINT64_MAX, max = 0;
+    uint64_t iterations = 0;
+    uint64_t timeSumQuadratic = 0;
+    start = std::chrono::high_resolution_clock::now();
+    while(true) {
+        uint64_t res = 0;
+        {
+            Timer t("Benchmark");
+            startNewState(Status::Render);
+            managerWait();
+            res = t.stopSilent();
+        }
+        timeSumQuadratic += res * res;
+        iterations++;
+        min = res < min ? res : min;
+        max = res > max ? res : max;
+        startNewState(Status::Fill);
+        auto end = std::chrono::high_resolution_clock::now();
+        int64_t duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        if(duration > 2500) {
+            break;
+        }
+    }
+    float avgTime = sqrtf(1e-6f * timeSumQuadratic / iterations);
+    std::cout << "RMS: " << std::fixed << std::setprecision(3) << avgTime << "ms" << std::endl;
+    std::cout << "Min: " << std::fixed << std::setprecision(3) << min * 1e-3f << "ms" << std::endl;
+    std::cout << "Max: " << std::fixed << std::setprecision(3) << max * 1e-3f << "ms" << std::endl;
 }
 
 void WLM::workerEntryPoint(uint64_t threadId) {

@@ -15,6 +15,7 @@ public:
     Scene(Config& config);
     pixel getPixel(uint32_t x, uint32_t y) {
         bool intr = false;
+        // FIXME: non optimal
         Ray ray = mCamera.getRay(mConfig, 2.0f * x / mConfig.renderWidth - 1.0f, 2.0f * y / mConfig.renderHeight - 1.0f);
         for(auto& obj : mObjects) {
             intr |= obj->intersect(ray);

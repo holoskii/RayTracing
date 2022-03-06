@@ -22,6 +22,8 @@ public:
     pixel * getImageBuffer();
     void startRender();
     void restartRender();
+    void benchmarkRender();
+
 
 private:
     enum class Status { Idle, Fill, Render, Shutdown };

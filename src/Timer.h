@@ -22,16 +22,28 @@ public:
         mStart = std::chrono::high_resolution_clock::now();
     }
 
-    void stop() {
+    /// Return time in us
+    uint64_t stopSilent() {
 
         if(!mRunning)
-            return;
+            return 0;
 
         mRunning = false;
         auto end = std::chrono::high_resolution_clock::now();
-        long time_taken = std::chrono::duration_cast<std::chrono::nanoseconds>(end - mStart).count();
+        uint64_t timeTaken = std::chrono::duration_cast<std::chrono::microseconds>(end - mStart).count();
+        return timeTaken;
+    }
 
-        std::cout << (mName.length() > 0 ? mName : "") << " \t" << std::fixed << std::setprecision(3) << std::setw(8) << time_taken * 1e-6  << " ms" << '\n';
+    /// Return time in us and print time in ms
+    uint64_t stop() {
+
+        if(!mRunning)
+            return 0;
+
+        uint64_t timeTaken = stopSilent();
+        std::cout << (mName.length() > 0 ? mName : "") << " \t" << std::fixed << std::setprecision(3)
+                  << std::setw(8) << timeTaken * 1e-3f  << " ms" << '\n';
+        return timeTaken;
     }
 
 private:
