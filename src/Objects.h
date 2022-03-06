@@ -30,10 +30,6 @@
 
 
 
-
-
-
-
 /// Material will store color, type, texture, normal maps, coefficient of refraction, etc...
 /// It shall define how object will interact with light ray intersection
 /// If may need to launch additional rays (reflections)
@@ -55,7 +51,7 @@ public:
     virtual bool intersect(const Ray& ray) = 0;
 };
 
-class Sphere : protected Object{
+class Sphere : public Object{
 public:
     float mRad;
 

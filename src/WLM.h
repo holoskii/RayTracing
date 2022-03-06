@@ -15,7 +15,7 @@ class RenderCore;
 /// WorkLoad Manager
 class WLM {
 public:
-    explicit WLM(Config& config);
+    WLM(Config& config, Scene& scene);
     ~WLM();
 
     bool isRenderRunning();
@@ -36,13 +36,14 @@ private:
 private:
     RenderCore                  mCore;
     Config &                    mConfig;
+    Scene&                      mScene;
     std::vector<std::thread>    mThreads;
     pixel *                     mImageBuffer;
     std::atomic<Status>         mStatus;
     uint64_t                    mLoopIndex      = 0;
+    std::atomic<uint64_t>       mTileIndex      = 0;
     std::atomic<uint64_t>       mWorkersReady;
     std::atomic<uint64_t>       mLineIndex;
-    std::atomic<uint64_t>       mTileIndex      = 0;
     std::vector<Tile>           mTiles;
     std::mutex                  mWorkerMutex;
     std::mutex                  mManagerMutex;

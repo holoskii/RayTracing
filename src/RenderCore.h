@@ -1,14 +1,16 @@
 #pragma once
 
 #include "RenderBasics.h"
+#include "Scene.h"
 
 class RenderCore {
 public:
-    explicit RenderCore(Config & config);
+    RenderCore(Config & config, Scene& scene);
     void renderTile(Tile & tile, bool & running);
     void setBuffer(pixel * imageBuffer);
 
-    Config & mConfig;
+    Config& mConfig;
+    Scene& mScene;
     pixel * mImageBuffer = nullptr;
 };
 

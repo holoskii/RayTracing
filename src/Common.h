@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Config.h"
-
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
-#include "glm/ext/scalar_constants.hpp"
-
+#include <glm/ext/scalar_constants.hpp>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -23,6 +20,8 @@ public:
     vec3 mDir;
 };
 
+
+#if ENABLE_TRACE
 class FunctionTracer {
 public:
     explicit FunctionTracer(const char* name) :
@@ -36,8 +35,6 @@ public:
 
     std::string mName;
 };
-
-#if ENABLE_TRACE
 #define TRACEME FunctionTracer{__func__};
 #else
 #define TRACEME ((void)0);

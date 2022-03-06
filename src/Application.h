@@ -1,13 +1,9 @@
 #pragma once
 
-#ifndef GL_CLAMP_TO_EDGE
-#define GL_CLAMP_TO_EDGE 0x812F
-#endif
-
 #include "Common.h"
 #include "Config.h"
+#include "Scene.h"
 #include "WLM.h"
-
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 
@@ -30,6 +26,7 @@ private:
 
 private:
     Config                      mConfig;
+    Scene                       mScene;
     WLM                         mWLM;
     GLFWwindow *                mWindowGLFW             = nullptr;
     GLuint                      mOpenGLTexture          = 0;

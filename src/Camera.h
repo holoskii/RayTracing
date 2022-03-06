@@ -3,19 +3,37 @@
 #include "Common.h"
 #include "Config.h"
 
-/// Direction, FOV (from config)
-/// Used to get camera rays
-/// Move and turn calculated here
+/// Coordinates
+/// y
+/// ▲    -z
+/// │  /
+/// │ /
+/// └───► x
+/// Rotation
+/// Right-hand rule
+/// FIXME https://learnopengl.com/Getting-started/Camera
+/// FIXME https://www.scratchapixel.com/code.php?id=7&origin=/lessons/3d-basic-rendering/ray-tracing-generating-camera-rays&src=0
+
+/// Only function - get camera rays
 class Camera {
 public:
-    float fov = pi / 2; // 90 deg FOV
-    vec3 rot; // rotation, only y and x is used
-    vec3 pos = {0,0,0};
+    Camera(Config& config);
 
-    vec3 lookDir = glm::normalize(vec3{0, 0, -1});
-    vec3 rightVec = glm::normalize(glm::cross(lookDir, {0, 1, 0}));
-    vec3 upVec = glm::normalize(glm::cross(rightVec, lookDir));
-
-    /// Screen space coordinates (1, 1) is upper right
+    /// Screen space coordinates (-1 ... 1)
     Ray getRay(Config &config, float x, float y);
+
+    /// Updates position vectors(forward, up, right)
+    void setRotation(const vec3& rot);
+    void setPosition(const vec3& pos);
+
+private:
+    /// Camera parameters
+    Config& mConfig;
+    float   mFov;
+    vec3    mPos;
+
+    /// Stores rotation info
+    vec3    mLookDir;
+    vec3    mRightVec;
+    vec3    mUpVec;
 };

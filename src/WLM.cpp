@@ -2,9 +2,10 @@
 
 #include <cstring>
 
-WLM::WLM(Config& config) :
+WLM::WLM(Config& config, Scene& scene) :
         mConfig(config),
-        mCore(config),
+        mScene(scene),
+        mCore(config, scene),
         mWorkersReady(mConfig.threadsCount),
         mStatus(Status::Fill),
         mLineIndex(0) {

@@ -1,19 +1,21 @@
 #include "Application.h"
+
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
 #include "Timer.h"
-
 #include <iostream>
-#include <sstream>
-
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
 
 Application::Application() :
         mConfig(),
-        mWLM(mConfig) {}
+        mScene(mConfig),
+        mWLM(mConfig, mScene) {}
 
 void Application::start() {
-    TRACEME
     try {
         startUnsafe();
     }
@@ -23,7 +25,6 @@ void Application::start() {
 }
 
 Application::~Application() {
-    TRACEME
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -73,7 +74,7 @@ void Application::setup() {
     ImGui_ImplGlfw_InitForOpenGL(mWindowGLFW, true);
     ImGui_ImplOpenGL3_Init(glslVersion);
 
-    ImFont* font = io.Fonts->AddFontFromFileTTF(mConfig.defaultFontLocation, mConfig.fontSize);
+    ImFont* font = io.Fonts->AddFontFromFileTTF(mConfig.fontPath, mConfig.fontSize);
     font->Scale = mConfig.fontScale;
     io.Fonts->AddFontDefault(font->ConfigData);
 
@@ -152,7 +153,6 @@ void Application::handleCore() {
 }
 
 void Application::showBuffer() {
-    TRACEME
     if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime)) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t)mConfig.renderWidth, (int32_t)mConfig.renderHeight,
                      0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
@@ -160,7 +160,6 @@ void Application::showBuffer() {
 }
 
 void Application::renderGUI() {
-    TRACEME
     ImGui::Render();
     int displayWidth, displayHeight;
     glfwGetFramebufferSize(mWindowGLFW, &displayWidth, &displayHeight);

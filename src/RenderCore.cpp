@@ -5,8 +5,9 @@
 
 #include <thread>
 
-RenderCore::RenderCore(Config & config) :
-        mConfig(config) {}
+RenderCore::RenderCore(Config& config, Scene& scene) :
+        mConfig(config),
+        mScene(scene) {}
 
 void RenderCore::renderTile(Tile & tile, bool & running) {
     assert(running);
@@ -41,20 +42,12 @@ void RenderCore::renderTile(Tile & tile, bool & running) {
         }
     }
     else {
-        Camera cam;
-        Sphere s1({0, 0, -20}, 1);
-        Sphere s2({5, 5, -4}, 1);
 
-        pixel intr{255, 0, 0, 255};
-        pixel nintr{0, 0, 0, 255};
 
-        for(int i = tile.yStart; i < tile.yEnd && running; i++) {
-            for(int j = tile.xStart; j < tile.xEnd && running; j++) {
-                Ray ray = cam.getRay(mConfig, 2.0f * j / mConfig.renderWidth - 1.0f, 2.0f * i / mConfig.renderHeight - 1.0f);
-                uint8_t val = (uint8_t)((ray.mDir.y + 1) / 2 * 255);
-                //mImageBuffer[(i * width + j)] = {val, 0, 0, 255};
 
-                mImageBuffer[(i * width + j)] = s1.intersect(ray) || s2.intersect(ray) ? intr : nintr;
+        for(uint32_t i = tile.yStart; i < tile.yEnd && running; i++) {
+            for(uint32_t j = tile.xStart; j < tile.xEnd && running; j++) {
+                mImageBuffer[(i * width + j)] = mScene.getPixel(j, i);
             }
         }
     }
