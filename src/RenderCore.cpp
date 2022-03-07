@@ -42,7 +42,8 @@ void RenderCore::renderTile(Tile & tile, bool & running) {
     else {
         for(uint32_t i = tile.yStart; i < tile.yEnd && running; i++) {
             for(uint32_t j = tile.xStart; j < tile.xEnd && running; j++) {
-                mImageBuffer[(i * mConfig.renderWidth + j)] = mScene.getPixel(j, i);
+                auto res = mScene.renderPixel(j, i);
+                mImageBuffer[(i * mConfig.renderWidth + j)] = res;
             }
         }
     }

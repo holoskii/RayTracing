@@ -20,6 +20,9 @@ public:
     vec3 mDir;
 };
 
+struct pixel {
+    uint8_t r, g, b, a;
+};
 
 #if ENABLE_TRACE
 class FunctionTracer {

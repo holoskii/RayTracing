@@ -7,20 +7,33 @@
 #include <vector>
 #include <memory>
 
+static pixel dirVec3ToPix(vec3& vec) {
+    return pixel {
+            (uint8_t)((vec.x / 2 + 0.5) * 255),
+            (uint8_t)((vec.y / 2 + 0.5) * 255),
+            (uint8_t)((vec.z / 2 + 0.5) * 255),
+            255
+    };
+}
+
 class Scene {
-    static constexpr pixel intrPix{255, 0, 0, 255};
-    static constexpr pixel nintrPix{0, 0, 0, 255};
+
 
 public:
     Scene(Config& config);
-    pixel getPixel(uint32_t x, uint32_t y) {
-        bool intr = false;
+    pixel renderPixel(uint32_t x, uint32_t y) {
+        bool result = false;
         // FIXME: non optimal
         Ray ray = mCamera.getRay(mConfig, 2.0f * x / mConfig.renderWidth - 1.0f, 2.0f * y / mConfig.renderHeight - 1.0f);
+        IntersectInfo finalIntr = {false};
         for(auto& obj : mObjects) {
-            intr |= obj->intersect(ray);
+            IntersectInfo intersectInfo = obj->intersect(ray);
+            bool replaceFinalIntrWithCurrent = intersectInfo.intersect && (finalIntr.intersect == false || finalIntr.distance > intersectInfo.distance);
+            if(replaceFinalIntrWithCurrent) {
+                finalIntr = intersectInfo;
+            }
         }
-        return intr ? intrPix : nintrPix;
+        return finalIntr.intersect ? dirVec3ToPix(finalIntr.normal) : mConfig.renderBGColor;
     }
 
 private:

@@ -16,7 +16,7 @@
 ///     from photon maps they hit
 
 /// FIXME
-/// -O2 -ffast-math -mtune=native
+/// -O2 -ffast-math -mtune=native -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 
 /// TODO
 /// Environmental map
@@ -29,11 +29,9 @@
 
 
 int main(int, char**) {
-    std::string name;
-    std::getline(std::cin, name);
-    objectTest();
+    // objectTest();
     Application app;
-    app.benchmark();
-    //app.start();
+    // app.benchmark();
+    app.start();
     return 0;
 }

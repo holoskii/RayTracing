@@ -5,6 +5,17 @@
 #include "Common.h"
 #include "Config.h"
 
+class Object;
+
+class IntersectInfo {
+public:
+    bool        intersect;
+    float       distance;
+    Object*     object;
+    vec3        normal;
+    // normal
+};
+
 /// Material will store color, type, texture, normal maps, coefficient of refraction, etc...
 /// It shall define how object will interact with light ray intersection
 /// If may need to launch additional rays (reflections)
@@ -23,7 +34,7 @@ public:
     Object(const vec3& pos) :
             mPos(pos) {}
 
-    virtual bool intersect(const Ray& ray) = 0;
+    virtual IntersectInfo intersect(const Ray& ray) = 0;
 };
 
 class Sphere : public Object{
@@ -37,7 +48,7 @@ private:
     float mRad;
     float mRadSqr;
 
-    bool intersect(const Ray& ray) override {
+    IntersectInfo intersect(const Ray& ray) override {
         // Solve equation: origin + direction * distance = point of intersection
         // We need to solve the triangle that formed  with radius perpendicular to ray direction,
         // vector from ray origin to center and ray direction vector
@@ -46,27 +57,32 @@ private:
         float adjSide = glm::dot(hypotenuse, ray.mDir);
         // Pointing another direction
         if (adjSide < 0) {
-            return false;
+            return { false };
         }
         // Pythagorean  theorem
         float oppositeSide = glm::dot(hypotenuse, hypotenuse) - adjSide * adjSide;
         // Out of sphere radius
         if (oppositeSide > mRadSqr) {
-            return false;
+            return { false };
         }
         // Distance from intersection point and opposite side
         float dist = sqrtf(mRadSqr - oppositeSide);
 
         // Distance from ray origin to intersection point
-        float result = adjSide - dist;
-        if(result < 0) {
-            result = adjSide + dist;
+        float resultDistance = adjSide - dist;
+        if(resultDistance < 0) {
+            resultDistance = adjSide + dist;
         }
-        if(result < 0) {
-            return false;
+        if(resultDistance < 0) {
+            return {false};
         }
 
-        return true;
+        return {
+            true,
+            resultDistance,
+            this,
+            glm::normalize(ray.mDir * resultDistance - mPos)
+        };
     }
 };
 

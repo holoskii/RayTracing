@@ -4,10 +4,6 @@
 
 #include <cstdint>
 
-struct pixel {
-    uint8_t r, g, b, a;
-};
-
 class Tile {
 public:
     int32_t xStart, xEnd;

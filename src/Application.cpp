@@ -174,7 +174,7 @@ void Application::renderGUI() {
     int displayWidth, displayHeight;
     glfwGetFramebufferSize(mWindowGLFW, &displayWidth, &displayHeight);
     glViewport(0, 0, displayWidth, displayHeight);
-    vec4 v = mConfig.backGroundColor;
+    vec4 v = mConfig.appBGColor;
     const ImVec4& bgCol = { v.x, v.y, v.z, v.w };
     glClearColor(bgCol.x, bgCol.y, bgCol.z, bgCol.w);
     glClear(GL_COLOR_BUFFER_BIT);
