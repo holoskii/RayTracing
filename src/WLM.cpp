@@ -10,12 +10,40 @@ WLM::WLM(Config& config, Scene& scene) :
         mWorkersReady(mConfig.threadsCount),
         mStatus(Status::Fill),
         mLineIndex(0) {
-    mImageBuffer = new pixel[mConfig.renderWidth * mConfig.renderHeight];
+    mImageBuffer = new Pixel[mConfig.renderWidth * mConfig.renderHeight];
     mCore.setBuffer(mImageBuffer);
     for(int i = 0; i < mConfig.threadsCount; i++) {
         mThreads.emplace_back(&WLM::workerEntryPoint, this, i);
     }
+
+    mWLMThread = std::thread(&WLM::WLMEntryPoint, this);
+}
+
+void WLM::WLMEntryPoint() {
+    std::cout << "WLMEntryPoint\n";
     startNewState(Status::Fill);
+    while(mStatus != Status::Shutdown) {
+        std::unique_lock<std::mutex> lk(mMutexWLM);
+        mCVWLM.wait(lk);
+
+        switch (mNextJob) {
+            case Job::StartRender: {
+                std::cout << "StartRender\n";
+                startNewState(Status::Render);
+                break;
+            }
+            case Job::RestartRender: {
+                std::cout << "Restart\n";
+                mRenderRunning = false;
+                startNewState(Status::Fill);
+                startNewState(Status::Render);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
 }
 
 WLM::~WLM() {
@@ -29,18 +57,16 @@ bool WLM::isRenderRunning() {
     return mStatus == Status::Render;
 }
 
-pixel * WLM::getImageBuffer() {
+Pixel * WLM::getImageBuffer() {
     return mImageBuffer;
 }
 
 void WLM::startRender() {
-    startNewState(Status::Render);
+    setNextJob(Job::StartRender);
 }
 
 void WLM::restartRender() {
-    // this code should execute in new thread to avoid blocking main thread
-    startNewState(Status::Fill);
-    startNewState(Status::Render);
+    setNextJob(Job::RestartRender);
 }
 
 void WLM::benchmarkRender() {
@@ -98,7 +124,7 @@ void WLM::workerEntryPoint(uint64_t threadId) {
                 if(line >= mConfig.renderHeight) {
                     break;
                 }
-                std::memset(mImageBuffer + line * mConfig.renderWidth, 0, mConfig.renderWidth * sizeof(pixel));
+                std::memset(mImageBuffer + line * mConfig.renderWidth, 0, mConfig.renderWidth * sizeof(Pixel));
             }
         }
         else if(mStatus == Status::Render) {
@@ -111,6 +137,14 @@ void WLM::workerEntryPoint(uint64_t threadId) {
             }
         }
         workerNotifyManager();
+    }
+}
+
+void WLM::setNextJob(Job nextJob) {
+    mNextJob = nextJob;
+    {
+        std::lock_guard<std::mutex> lk(mMutexWLM);
+        mCVWLM.notify_one();
     }
 }
 

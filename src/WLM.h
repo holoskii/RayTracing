@@ -19,7 +19,7 @@ public:
     ~WLM();
 
     bool isRenderRunning();
-    pixel * getImageBuffer();
+    Pixel * getImageBuffer();
     void startRender();
     void restartRender();
     void benchmarkRender();
@@ -27,12 +27,16 @@ public:
 
 private:
     enum class Status { Idle, Fill, Render, Shutdown };
+    enum class Job { Idle, StartRender, RestartRender };
 
     void workerEntryPoint(uint64_t threadId);
+    void WLMEntryPoint();
+
     void startNewState(Status newStatus);
     void managerNotifyWorkers();
     void workerNotifyManager();
     void managerWait();
+    void setNextJob(Job nextJob);
     void workerWait(uint64_t & threadLoopIndex);
 
 private:
@@ -40,7 +44,8 @@ private:
     Config &                    mConfig;
     Scene&                      mScene;
     std::vector<std::thread>    mThreads;
-    pixel *                     mImageBuffer;
+    std::thread                 mWLMThread;
+    Pixel *                     mImageBuffer;
     std::atomic<Status>         mStatus;
     uint64_t                    mLoopIndex      = 0;
     std::atomic<uint64_t>       mTileIndex      = 0;
@@ -52,4 +57,8 @@ private:
     std::condition_variable     mCVManager;
     std::condition_variable     mCVWorker;
     bool                        mRenderRunning;
+
+    std::mutex                  mMutexWLM;
+    std::condition_variable     mCVWLM;
+    Job                         mNextJob;
 };
