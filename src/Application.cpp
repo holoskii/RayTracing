@@ -101,7 +101,6 @@ void Application::setup() {
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
-    // replace with glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mConfig.renderWidth, mConfig.renderHeight,
                     0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
 };

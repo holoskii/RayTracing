@@ -13,7 +13,6 @@ public:
     float       distance;
     Object*     object;
     vec3        normal;
-    // normal
 };
 
 /// Material will store color, type, texture, normal maps, coefficient of refraction, etc...
@@ -22,14 +21,23 @@ public:
 /// Params like metallic, specular, etc... see Materials at UE and Unity
 class Material {
 public:
+    Material() {
+        mColor = { 255, 0, 0, 255 };
+    }
 
+
+    Material(vec4& color) :
+            mColor(color) {}
+private:
+    vec4 mColor;
 };
 
 /// Defiles position, orientation, type (sphere, mesh, cylinder, etc)
 /// have to check if the object intersects with the ray
 class Object {
 public:
-    vec3 mPos;
+    vec3        mPos;
+    Material    mMaterial;
 
     Object(const vec3& pos) :
             mPos(pos) {}
@@ -88,13 +96,16 @@ private:
 
 /// Like the object + intensity and color
 /// Will have to emit photons in photon mapping stage
-class LightSource : public Object {
-
+class LightSource {
+public:
+    vec3 mPos;
 };
 
 /// Like LightSource, but never intersects with the ray
 class PointLightSource : public Object {
-
+public:
+    vec3 color;
+    float luminosity;
 };
 
 

@@ -7,12 +7,11 @@
 #include <vector>
 #include <memory>
 
-static pixel dirVec3ToPix(vec3& vec) {
-    return pixel {
+static Pixel dirVec3ToPix(vec3& vec) {
+    return Pixel {
             (uint8_t)((vec.x / 2 + 0.5) * 255),
             (uint8_t)((vec.y / 2 + 0.5) * 255),
-            (uint8_t)((vec.z / 2 + 0.5) * 255),
-            255
+            (uint8_t)((vec.z / 2 + 0.5) * 255)
     };
 }
 
@@ -21,11 +20,10 @@ class Scene {
 
 public:
     Scene(Config& config);
-    pixel renderPixel(uint32_t x, uint32_t y) {
-        bool result = false;
+    Pixel renderPixel(uint32_t x, uint32_t y) {
         // FIXME: non optimal
         Ray ray = mCamera.getRay(mConfig, 2.0f * x / mConfig.renderWidth - 1.0f, 2.0f * y / mConfig.renderHeight - 1.0f);
-        IntersectInfo finalIntr = {false};
+        IntersectInfo finalIntr = { false };
         for(auto& obj : mObjects) {
             IntersectInfo intersectInfo = obj->intersect(ray);
             bool replaceFinalIntrWithCurrent = intersectInfo.intersect && (finalIntr.intersect == false || finalIntr.distance > intersectInfo.distance);
@@ -33,7 +31,15 @@ public:
                 finalIntr = intersectInfo;
             }
         }
-        return finalIntr.intersect ? dirVec3ToPix(finalIntr.normal) : mConfig.renderBGColor;
+
+        if(!finalIntr.intersect) {
+            return mConfig.renderBGColor;
+        }
+
+        Object* & obj = finalIntr.object;
+
+
+        return dirVec3ToPix(finalIntr.normal);
     }
 
 private:

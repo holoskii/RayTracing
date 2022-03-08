@@ -20,7 +20,6 @@ WLM::WLM(Config& config, Scene& scene) :
 }
 
 void WLM::WLMEntryPoint() {
-    std::cout << "WLMEntryPoint\n";
     startNewState(Status::Fill);
     while(mStatus != Status::Shutdown) {
         std::unique_lock<std::mutex> lk(mMutexWLM);
@@ -28,12 +27,10 @@ void WLM::WLMEntryPoint() {
 
         switch (mNextJob) {
             case Job::StartRender: {
-                std::cout << "StartRender\n";
                 startNewState(Status::Render);
                 break;
             }
             case Job::RestartRender: {
-                std::cout << "Restart\n";
                 mRenderRunning = false;
                 startNewState(Status::Fill);
                 startNewState(Status::Render);

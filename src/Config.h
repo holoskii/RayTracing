@@ -16,8 +16,6 @@ static std::string RenderModeString(RenderMode renderMode) {
     return RenderModeStringVector.at((uint64_t)renderMode);
 }
 
-class pixel;
-
 class Config {
 public:
     RenderMode  renderMode      = RenderMode::Advanced;
@@ -26,7 +24,7 @@ public:
     float       fontSize        = 16.0f;
     float       fontScale       = 2.0f;
     glm::vec4   appBGColor      = { 0.45f, 0.55f, 0.60f, 1.00f };
-    pixel       renderBGColor   = { 128, 128, 0, 255 };
+    Pixel       renderBGColor   = { 74, 75, 82 };
     uint32_t    windowWidth     = 1920;
     uint32_t    windowHeight    = 1080;
     uint32_t    renderWidth     = 1920 / 2;

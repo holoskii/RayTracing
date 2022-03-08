@@ -7,10 +7,10 @@ class RenderCore {
 public:
     RenderCore(Config & config, Scene& scene);
     void renderTile(Tile & tile, bool & running);
-    void setBuffer(pixel * imageBuffer);
+    void setBuffer(Pixel * imageBuffer);
 
     Config& mConfig;
     Scene& mScene;
-    pixel * mImageBuffer = nullptr;
+    Pixel * mImageBuffer = nullptr;
 };
 

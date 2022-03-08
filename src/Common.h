@@ -20,8 +20,16 @@ public:
     vec3 mDir;
 };
 
-struct pixel {
-    uint8_t r, g, b, a;
+class Pixel {
+public:
+    Pixel() = default;
+
+    Pixel(uint8_t _r, uint8_t _g, uint8_t _b) :
+        r(_r), g(_g), b(_b) { a = 255; }
+
+private:
+    uint8_t r, g, b;
+    uint8_t a;
 };
 
 #if ENABLE_TRACE
