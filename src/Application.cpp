@@ -103,6 +103,8 @@ void Application::setup() {
 #endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mConfig.renderWidth, mConfig.renderHeight,
                     0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
+
+    mNewRenderMode = mConfig.renderMode;
 };
 
 void Application::setupGUI() {
@@ -131,18 +133,61 @@ void Application::setupGUI() {
 
     {
         ImGui::Begin("Configuration");
-        if (ImGui::TreeNode("Selection State: Single Selection"))
+        if (ImGui::TreeNode("Configuration"))
         {
             int& selectedInt = (int&)mConfig.renderMode;
             for (int i = 1; i < RenderModeStringVector.size(); i++) {
                 if (ImGui::Selectable(RenderModeStringVector[i].c_str(), selectedInt == i)) {
                     if(selectedInt != i) {
-                        mRestartRender = true;
+                        restartRender();
                         mNewRenderMode = (RenderMode)i;
                     }
                 }
             }
             ImGui::TreePop();
+        }
+
+        bool res = false;
+
+        static float posMin = -50;
+        static float posMax = 50;
+
+        if (ImGui::TreeNode("Objects"))
+        {
+            int i = 1;
+            std::stringstream ss;
+            for(auto& obj : mScene.mObjects) {
+                ss << "Object " << i;
+                ImGui::Text(ss.str().c_str());
+                ss.str("");
+                ss << "Obj " << i << " x";
+                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.x, 0.005f,  &posMin, &posMax, "%f");
+                ss.str("");
+                ss << "Obj " << i << " y";
+                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.y, 0.005f,  &posMin, &posMax, "%f");
+                ss.str("");
+                ss << "Obj " << i << " z";
+                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.z, 0.005f,  &posMin, &posMax, "%f");
+                i++;
+                ss.str("");
+            }
+
+            ImGui::TreePop();
+        }
+
+        vec3& camPos = mScene.mCamera.mPos;
+
+        static float fovMinRad = degToRad(15);
+        static float fovMaxRad = degToRad(180);
+        static float fovDeg = radToDeg(mScene.mCamera.mFov);
+
+        res |= ImGui::DragScalar(" Cam x",ImGuiDataType_Float, &camPos.x, 0.005f,  &posMin, &posMax, "%f");
+        res |= ImGui::DragScalar(" Cam y",ImGuiDataType_Float, &camPos.y, 0.005f,  &posMin, &posMax, "%f");
+        res |= ImGui::DragScalar(" Cam z",ImGuiDataType_Float, &camPos.z, 0.005f,  &posMin, &posMax, "%f");
+        res |=  ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f,  &fovMinRad, &fovMaxRad, "%f");
+
+        if(res) {
+            restartRender();
         }
 
         ImGui::End();
@@ -162,7 +207,8 @@ void Application::handleCore() {
 }
 
 void Application::showBuffer() {
-    if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime)) {
+    if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime) &&
+            timePassed(mRenderRestartTimePoint, 10) ) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t)mConfig.renderWidth, (int32_t)mConfig.renderHeight,
                      0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
     }
@@ -180,6 +226,11 @@ void Application::renderGUI() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(mWindowGLFW);
+}
+
+void Application::restartRender() {
+    mRestartRender = true;
+    mRenderRestartTimePoint = std::chrono::high_resolution_clock::now();
 }
 
 bool Application::timePassed(TimePoint& timePoint, uint64_t duration) {

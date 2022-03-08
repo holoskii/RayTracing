@@ -26,7 +26,6 @@ public:
     void setRotation(const vec3& rot);
     void setPosition(const vec3& pos);
 
-private:
     /// Camera parameters
     Config& mConfig;
     float   mFov;

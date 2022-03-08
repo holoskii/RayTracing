@@ -23,6 +23,7 @@ private:
     void handleCore();
     void showBuffer();
     void renderGUI();
+    void restartRender();
     static bool timePassed(TimePoint& timePoint, uint64_t duration);
     static void glfwErrorCallback(int error, const char* description);
 
@@ -33,6 +34,7 @@ private:
     GLFWwindow *                mWindowGLFW             = nullptr;
     GLuint                      mOpenGLTexture          = 0;
     TimePoint                   mBufferUpdateTimePoint;
+    TimePoint                   mRenderRestartTimePoint;
     bool                        mRestartRender          = false;
     RenderMode                  mNewRenderMode          = RenderMode::Fast;
     bool                        mShutdown               = false;

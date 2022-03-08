@@ -32,6 +32,14 @@ private:
     uint8_t a;
 };
 
+inline float degToRad(float deg) {
+    return deg * pi / 180.0f;
+}
+
+inline float radToDeg(float rad) {
+    return rad / pi * 180.0f;
+}
+
 #if ENABLE_TRACE
 class FunctionTracer {
 public:

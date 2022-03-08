@@ -42,7 +42,6 @@ public:
         return dirVec3ToPix(finalIntr.normal);
     }
 
-private:
     Camera                  mCamera;
     Config&                 mConfig;
     std::vector<std::unique_ptr<Object>>     mObjects;

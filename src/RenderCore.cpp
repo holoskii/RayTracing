@@ -10,6 +10,8 @@ RenderCore::RenderCore(Config& config, Scene& scene) :
         mScene(scene) {}
 
 void RenderCore::renderTile(Tile & tile, bool & running) {
+    if(!running)
+        return;
     assert(running);
     assert(mImageBuffer);
     if(mConfig.renderMode == RenderMode::Fast) {

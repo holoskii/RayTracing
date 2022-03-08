@@ -94,6 +94,47 @@ private:
     }
 };
 
+class Rectangle : public Object {
+public:
+    Rectangle(vec3 pos, vec3 side1, vec3 side2) :
+            Object(pos),
+            mSide1Len(glm::length(side1)),
+            mSide1(glm::normalize(side1)),
+            mSide2Len(glm::length(side2)),
+            mSide2(side2) {
+        mNormal = glm::cross(side1, side2);
+    }
+
+    vec3 mSide1;
+    float mSide1Len;
+    vec3 mSide2;
+    float mSide2Len;
+    vec3 mNormal;
+
+    IntersectInfo intersect(const Ray& ray) override {
+        if(glm::dot(ray.mDir, mNormal) > 0) {
+            return { false };
+        }
+
+        // resultDistance = ((mPos - ray.mPos).N) / (ray.dir.N)
+        float resultDistance = glm::dot(mPos - ray.mPos, mNormal) / glm::dot(ray.mDir, mNormal);
+        vec3 p = (ray.mPos + resultDistance * ray.mDir) - mPos;
+
+        auto inRange = [](float v, float max){ return v >= 0 && v <= max; };
+
+        if(inRange(glm::dot(p, mSide1), mSide1Len) && inRange(glm::dot(p, mSide2), mSide2Len)) {
+            return {
+                    true,
+                    resultDistance,
+                    this,
+                    mNormal
+            };
+        }
+
+        return { false };
+    }
+};
+
 /// Like the object + intensity and color
 /// Will have to emit photons in photon mapping stage
 class LightSource {
