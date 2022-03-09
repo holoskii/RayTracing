@@ -5,9 +5,11 @@
 #endif
 
 #include "Timer.h"
+#include "imgui/imgui_internal.h"
 #include <iostream>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+
 
 
 Application::Application() :
@@ -157,16 +159,15 @@ void Application::setupGUI() {
             int i = 1;
             std::stringstream ss;
             for(auto& obj : mScene.mObjects) {
-                ss << "Object " << i;
-                ImGui::Text(ss.str().c_str());
+                ImGui::Text(obj->mName.c_str());
                 ss.str("");
-                ss << "Obj " << i << " x";
+                ss << obj->mName << " x";
                 res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.x, 0.005f,  &posMin, &posMax, "%f");
                 ss.str("");
-                ss << "Obj " << i << " y";
+                ss << obj->mName << " y";
                 res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.y, 0.005f,  &posMin, &posMax, "%f");
                 ss.str("");
-                ss << "Obj " << i << " z";
+                ss << obj->mName << " z";
                 res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.z, 0.005f,  &posMin, &posMax, "%f");
                 i++;
                 ss.str("");
@@ -185,6 +186,13 @@ void Application::setupGUI() {
         res |= ImGui::DragScalar(" Cam y",ImGuiDataType_Float, &camPos.y, 0.005f,  &posMin, &posMax, "%f");
         res |= ImGui::DragScalar(" Cam z",ImGuiDataType_Float, &camPos.z, 0.005f,  &posMin, &posMax, "%f");
         res |=  ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f,  &fovMinRad, &fovMaxRad, "%f");
+
+        ImGui::Spacing();
+
+        ImGui::InputInt("x", &mConfig.debugX);
+        ImGui::InputInt("y", &mConfig.debugY);
+        ImGui::Checkbox("show", &mConfig.showDebugPixel);
+        ImGui::Checkbox("debug", &mConfig.debugPixel);
 
         if(res) {
             restartRender();
@@ -209,8 +217,21 @@ void Application::handleCore() {
 void Application::showBuffer() {
     if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime) &&
             timePassed(mRenderRestartTimePoint, 10) ) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t)mConfig.renderWidth, (int32_t)mConfig.renderHeight,
+        Pixel temp;
+        Pixel* buf = mWLM.getImageBuffer();
+        if(mConfig.showDebugPixel) {
+            mConfig.debugY = mConfig.debugY < mConfig.renderHeight ? mConfig.debugY : mConfig.renderHeight - 1;
+            mConfig.debugX = mConfig.debugX < mConfig.renderWidth ? mConfig.debugX : mConfig.renderWidth - 1;
+            temp = buf[mConfig.debugY * mConfig.renderWidth + mConfig.debugX];
+            buf[mConfig.debugY * mConfig.renderWidth + mConfig.debugX] = {255, 0, 0};
+
+        }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t) mConfig.renderWidth, (int32_t) mConfig.renderHeight,
                      0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
+
+        if(mConfig.showDebugPixel) {
+            buf[mConfig.debugY * mConfig.renderWidth + mConfig.debugX] = temp;
+        }
     }
 }
 

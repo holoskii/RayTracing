@@ -7,12 +7,25 @@
 
 class Object;
 
+static float offsetScalar = 1e-4;
+
 class IntersectInfo {
 public:
+    IntersectInfo(bool _intersect)
+        : intersect(_intersect) {}
+
+    IntersectInfo(bool _intersect, float _distance, Object* _object, vec3 _normal, vec3 _point)
+        : intersect(_intersect)
+        , distance(_distance)
+        , object(_object)
+        , normal(_normal)
+        , point(_point) {}
+
     bool        intersect;
     float       distance;
     Object*     object;
     vec3        normal;
+    vec3        point;
 };
 
 /// Material will store color, type, texture, normal maps, coefficient of refraction, etc...
@@ -38,17 +51,23 @@ class Object {
 public:
     vec3        mPos;
     Material    mMaterial;
+    std::string mName;
+
+    Object(const std::string&& name, const vec3& pos) :
+            mName(std::move(name)), mPos(pos) {}
 
     Object(const vec3& pos) :
-            mPos(pos) {}
+            Object("None", pos) {}
+
+
 
     virtual IntersectInfo intersect(const Ray& ray) = 0;
 };
 
 class Sphere : public Object{
 public:
-    Sphere(vec3 pos, float rad) :
-            Object(pos),
+    Sphere(std::string&& name, vec3 pos, float rad) :
+            Object(std::move(name), pos),
             mRad(rad),
             mRadSqr(rad * rad) {}
 
@@ -85,19 +104,23 @@ private:
             return {false};
         }
 
+        vec3 point = ray.mPos + ray.mDir * resultDistance;
+        vec3 normal = glm::normalize(point - mPos);
+
         return {
             true,
             resultDistance,
             this,
-            glm::normalize(ray.mDir * resultDistance - mPos)
+            normal,
+            point + normal * offsetScalar
         };
     }
 };
 
 class Rectangle : public Object {
 public:
-    Rectangle(vec3 pos, vec3 side1, vec3 side2) :
-            Object(pos),
+    Rectangle(std::string&& name, vec3 pos, vec3 side1, vec3 side2) :
+            Object(std::move(name), pos),
             mSide1Len(glm::length(side1)),
             mSide1(glm::normalize(side1)),
             mSide2Len(glm::length(side2)),
@@ -118,7 +141,8 @@ public:
 
         // resultDistance = ((mPos - ray.mPos).N) / (ray.dir.N)
         float resultDistance = glm::dot(mPos - ray.mPos, mNormal) / glm::dot(ray.mDir, mNormal);
-        vec3 p = (ray.mPos + resultDistance * ray.mDir) - mPos;
+        vec3 point = ray.mPos + resultDistance * ray.mDir;
+        vec3 p = (point) - mPos;
 
         auto inRange = [](float v, float max){ return v >= 0 && v <= max; };
 
@@ -127,7 +151,8 @@ public:
                     true,
                     resultDistance,
                     this,
-                    mNormal
+                    mNormal,
+                    point + offsetScalar * mNormal
             };
         }
 
@@ -140,13 +165,23 @@ public:
 class LightSource {
 public:
     vec3 mPos;
+    vec3 mColor;
+    float mLuminosity;
+
+
+    LightSource(vec3 pos, vec3 color, float luminosity)
+        :mPos(pos), mColor(color), mLuminosity(luminosity) {
+
+    }
 };
 
 /// Like LightSource, but never intersects with the ray
-class PointLightSource : public Object {
+class PointLightSource : public LightSource {
 public:
-    vec3 color;
-    float luminosity;
+
+    PointLightSource(vec3 pos, vec3 color, float luminosity)
+        : LightSource(pos, color, luminosity) {
+    }
 };
 
 

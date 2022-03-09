@@ -31,9 +31,15 @@ public:
     uint32_t    renderWidth     = 1080 / 4;
     uint32_t    renderHeight    = 1080 / 4;
     uint32_t    frameUpdateTime = 30;
-    uint32_t    threadsCount    = 30;
+    uint32_t    threadsCount    = 1;
     uint32_t    tileSize        = 128;
     float       fov             = glm::pi<float>() / 4;
     glm::vec3   cameraPosition  = { 0.5, 0.5, 0.75 };
     glm::vec3   cameraRotation  = { 0, 0, 0 };
+
+
+    int debugX = 102;
+    int debugY = 44;
+    bool showDebugPixel = true;
+    bool debugPixel = false;
 };

@@ -26,7 +26,7 @@
 /// Browse another implementations, see what mine is lacking
 /// Compare low precision to high precision
 /// Add option to lock camera on center
-///
+/// https://www.teamten.com/lawrence/graphics/gamma/
 
 
 
@@ -44,6 +44,10 @@ int main(int, char**) {
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+// #include <format>
+#include <cassert>
+#include <iostream>
+#include <sstream>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -144,6 +148,18 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
+
+
+
+    /*ImGui::Text("Mouse released:");     for (int i = 0; i < count; i++) if (ImGui::IsMouseReleased(i))  { ImGui::SameLine(); ImGui::Text("b%d", i); }
+
+    ImGui::Text(, );
+*/
+
+    ImFont* font = io.Fonts->AddFontFromFileTTF("../../3rdParty/imgui/misc/fonts/DroidSans.ttf", 16);
+    font->Scale = 2;
+    io.Fonts->AddFontDefault(font->ConfigData);
+
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
@@ -152,6 +168,9 @@ int main(int, char**)
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
+        if(ImGui::IsMouseReleased(0)) {
+        }
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -170,6 +189,10 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
+            /*std::cout << "Mouse pos: " << io.MousePos.x << ' ' << io.MousePos.y << " " << "Cursor pos: "
+            << ImGui::GetCursorPos().x << ' ' << ImGui::GetCursorPos().y << ' '
+            << io.MousePos.x - ImGui::GetCursorPos().x << ' ' << io.MousePos.y - ImGui::GetCursorPos().y << '\n';*/
+
             static float f = 0.0f;
             static int counter = 0;
 
