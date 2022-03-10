@@ -15,27 +15,32 @@ public:
     void benchmark();
 
 private:
-    void shutdown();
     void startUnsafe();
-    bool isRunning();
     void setup();
     void setupGUI();
     void handleCore();
     void showBuffer();
     void renderGUI();
+    void shutdown();
+    bool isRunning();
     void restartRender();
     static bool timePassed(TimePoint& timePoint, uint64_t duration);
     static void glfwErrorCallback(int error, const char* description);
 
 private:
+    /// GUI
+    GLFWwindow *                mWindowGLFW             = nullptr;
+    GLuint                      mOpenGLTexture          = 0;
+
+    /// Object managing render
     Config                      mConfig;
     Scene                       mScene;
     WLM                         mWLM;
-    GLFWwindow *                mWindowGLFW             = nullptr;
-    GLuint                      mOpenGLTexture          = 0;
+
+    /// Render
+    RenderMode                  mNewRenderMode          = RenderMode::Fast;
     TimePoint                   mBufferUpdateTimePoint;
     TimePoint                   mRenderRestartTimePoint;
     bool                        mRestartRender          = false;
-    RenderMode                  mNewRenderMode          = RenderMode::Fast;
     bool                        mShutdown               = false;
 };

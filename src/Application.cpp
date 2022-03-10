@@ -135,64 +135,73 @@ void Application::setupGUI() {
 
     {
         ImGui::Begin("Configuration");
-        if (ImGui::TreeNode("Configuration"))
-        {
-            int& selectedInt = (int&)mConfig.renderMode;
-            for (int i = 1; i < RenderModeStringVector.size(); i++) {
-                if (ImGui::Selectable(RenderModeStringVector[i].c_str(), selectedInt == i)) {
-                    if(selectedInt != i) {
+        if (ImGui::TreeNode("Configuration")) {
+            int &selectedInt = (int &) mConfig.renderMode;
+            for (int i = 1; i < getRenderModes().size(); i++) {
+                if (ImGui::Selectable(getRenderModes()[i].data(), selectedInt == i)) {
+                    if (selectedInt != i) {
                         restartRender();
-                        mNewRenderMode = (RenderMode)i;
+                        mNewRenderMode = (RenderMode) i;
                     }
                 }
             }
             ImGui::TreePop();
         }
+        ImGui::Spacing();
+
 
         bool res = false;
-
         static float posMin = -50;
         static float posMax = 50;
-
-        if (ImGui::TreeNode("Objects"))
-        {
+        if (ImGui::TreeNode("Objects")) {
             int i = 1;
             std::stringstream ss;
-            for(auto& obj : mScene.mObjects) {
+            for (auto &obj: mScene.mObjects) {
                 ImGui::Text(obj->mName.c_str());
                 ss.str("");
                 ss << obj->mName << " x";
-                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.x, 0.005f,  &posMin, &posMax, "%f");
+                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x, 0.005f, &posMin, &posMax,
+                                         "%f");
                 ss.str("");
                 ss << obj->mName << " y";
-                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.y, 0.005f,  &posMin, &posMax, "%f");
+                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y, 0.005f, &posMin, &posMax,
+                                         "%f");
                 ss.str("");
                 ss << obj->mName << " z";
-                res |= ImGui::DragScalar(ss.str().c_str(),ImGuiDataType_Float, &obj->mPos.z, 0.005f,  &posMin, &posMax, "%f");
+                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z, 0.005f, &posMin, &posMax,
+                                         "%f");
                 i++;
                 ss.str("");
             }
 
             ImGui::TreePop();
         }
+        ImGui::Spacing();
 
-        vec3& camPos = mScene.mCamera.mPos;
+
+        vec3 &camPos = mScene.mCamera.mPos;
 
         static float fovMinRad = degToRad(15);
         static float fovMaxRad = degToRad(180);
         static float fovDeg = radToDeg(mScene.mCamera.mFov);
+        {
+            res |= ImGui::DragScalar(" Cam x", ImGuiDataType_Float, &camPos.x, 0.005f, &posMin, &posMax, "%f");
+            res |= ImGui::DragScalar(" Cam y", ImGuiDataType_Float, &camPos.y, 0.005f, &posMin, &posMax, "%f");
+            res |= ImGui::DragScalar(" Cam z", ImGuiDataType_Float, &camPos.z, 0.005f, &posMin, &posMax, "%f");
+            res |= ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f, &fovMinRad, &fovMaxRad,"%f");
+            ImGui::Spacing();
+        }
 
-        res |= ImGui::DragScalar(" Cam x",ImGuiDataType_Float, &camPos.x, 0.005f,  &posMin, &posMax, "%f");
-        res |= ImGui::DragScalar(" Cam y",ImGuiDataType_Float, &camPos.y, 0.005f,  &posMin, &posMax, "%f");
-        res |= ImGui::DragScalar(" Cam z",ImGuiDataType_Float, &camPos.z, 0.005f,  &posMin, &posMax, "%f");
-        res |=  ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f,  &fovMinRad, &fovMaxRad, "%f");
-
+        if (ImGui::TreeNode("Debug"))
+        {
+            ImGui::InputInt("x", &mConfig.debugX);
+            ImGui::InputInt("y", &mConfig.debugY);
+            ImGui::Checkbox("show", &mConfig.showDebugPixel);
+            ImGui::Checkbox("debug", &mConfig.debugPixel);
+            ImGui::TreePop();
+        }
         ImGui::Spacing();
 
-        ImGui::InputInt("x", &mConfig.debugX);
-        ImGui::InputInt("y", &mConfig.debugY);
-        ImGui::Checkbox("show", &mConfig.showDebugPixel);
-        ImGui::Checkbox("debug", &mConfig.debugPixel);
 
         if(res) {
             restartRender();

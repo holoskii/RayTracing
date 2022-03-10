@@ -4,16 +4,32 @@
 Scene::Scene(Config& config) :
         mConfig(config),
         mCamera(config) {
-    mLights.emplace_back(new PointLightSource(vec3{ 0.5, 0.99, -0.5 }, vec3{1, 1, 1}, 1));
+    mLights.emplace_back(new PointLightSource(vec3{ 0.5, 0.99, -0.5 }, vec3{1, 1, 1}, 0.75));
 
-    mObjects.emplace_back(new Sphere("Smaller", vec3{0.3, 0.2, -0.5}, 0.1));
-    mObjects.emplace_back(new Sphere("Bigger", vec3{0.7, 0.3, -0.3}, 0.15));
+    mObjects.emplace_back(
+        new Sphere(
+            "Smaller",
+            vec3{0.3, 0.2, -0.5},
+            Material{vec3{1}},
+            0.1
+        )
+    );
+
+    mObjects.emplace_back(
+        new Sphere(
+            "Bigger",
+            vec3{0.7, 0.3, -0.3},
+            Material{vec3{1}},
+            0.15
+        )
+    );
 
     // floor
     mObjects.emplace_back(
         new Rectangle(
             "Floor",
             vec3{0,0,0},
+            Material{vec3{1}},
             vec3{1,0,0},
             vec3{0,0,-1}
         )
@@ -24,6 +40,7 @@ Scene::Scene(Config& config) :
         new Rectangle(
             "Ceiling",
             vec3{0,1,0},
+            Material{vec3{1}},
             vec3{0,0,-1},
             vec3{1,0,0}
         )
@@ -34,6 +51,7 @@ Scene::Scene(Config& config) :
         new Rectangle(
             "Back",
             vec3{0,0,-1},
+            Material{vec3{0, 1, 0}},
             vec3{1,0,0},
             vec3{0,1,0}
         )
@@ -41,22 +59,24 @@ Scene::Scene(Config& config) :
 
     // left
     mObjects.emplace_back(
-            new Rectangle(
-                "Left",
-                vec3{0,0,0},
-                vec3{0,0,-1},
-                vec3{0,1,0}
-            )
+        new Rectangle(
+            "Left",
+            vec3{0,0,0},
+            Material{vec3{1, 0, 0}},
+            vec3{0,0,-1},
+            vec3{0,1,0}
+        )
     );
 
     // right
     mObjects.emplace_back(
-            new Rectangle(
-                "Right",
-                vec3{1,0,0},
-                vec3{0,1,0},
-                vec3{0,0,-1}
-            )
+        new Rectangle(
+            "Right",
+            vec3{1,0,0},
+            Material{vec3{0, 0, 1 }},
+            vec3{0,1,0},
+            vec3{0,0,-1}
+        )
     );
 }
 
@@ -64,7 +84,6 @@ vec3 Scene::illuminatePoint(IntersectInfo& intrInfo) {
     bool intersect = false;
     IntersectInfo finalIntr = { false };
     for(auto& light : mLights) {
-
         Ray ray = { intrInfo.point, glm::normalize(light->mPos - intrInfo.point) };
 
         for(auto& object : mObjects) {
@@ -86,7 +105,7 @@ vec3 Scene::illuminatePoint(IntersectInfo& intrInfo) {
         float gamma = dp * light->mLuminosity / dist;
         gamma = std::min(gamma, 1.0f);
 
-        return vec3{1} * gamma;
+        return intrInfo.object->mMaterial.mColor * gamma;
     }
 
 
@@ -113,9 +132,11 @@ Pixel Scene::renderPixel(uint32_t x, uint32_t y) {
         return mConfig.renderBGColor;
     }
 
+
     return colorVec3ToPix(illuminatePoint(finalIntr));
-    return colorVec3ToPix(vec3{1,1,1} * (glm::distance(finalIntr.point, mCamera.mPos) / 5.0f));
-    /*depth, don't remove*/ return colorVec3ToPix(vec3{1,1,1} * finalIntr.distance / 5.0f);
+    /*uv*/ return colorVec3ToPix(vec3{finalIntr.uv.x, finalIntr.uv.y, 0});
+    /*depthe*/ return colorVec3ToPix(vec3{1,1,1} * finalIntr.distance / 5.0f);
+    /*photon partition*/ return colorVec3ToPix(vec3{1} * (((int32_t)(finalIntr.uv.x * 10) + (int32_t)(finalIntr.uv.y * 10)) % 2 * 0.5f));
 
     // return colorVec3ToPix(illuminatePoint(finalIntr));
     // dirVec3ToPix(finalIntr.normal);

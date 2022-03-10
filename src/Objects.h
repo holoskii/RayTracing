@@ -14,18 +14,20 @@ public:
     IntersectInfo(bool _intersect)
         : intersect(_intersect) {}
 
-    IntersectInfo(bool _intersect, float _distance, Object* _object, vec3 _normal, vec3 _point)
+    IntersectInfo(bool _intersect, float _distance, Object* _object, vec3 _normal, vec3 _point, vec2 _uv)
         : intersect(_intersect)
         , distance(_distance)
         , object(_object)
         , normal(_normal)
-        , point(_point) {}
+        , point(_point)
+        , uv(_uv) {}
 
     bool        intersect;
     float       distance;
     Object*     object;
     vec3        normal;
     vec3        point;
+    vec2        uv;
 };
 
 /// Material will store color, type, texture, normal maps, coefficient of refraction, etc...
@@ -34,15 +36,18 @@ public:
 /// Params like metallic, specular, etc... see Materials at UE and Unity
 class Material {
 public:
-    Material() {
-        mColor = { 255, 0, 0, 255 };
-    }
-
-
-    Material(vec4& color) :
+    Material(vec3&& color) :
             mColor(color) {}
-private:
-    vec4 mColor;
+
+    Material()
+        : Material(vec3{ 255, 255, 255 }) {}
+
+    vec3 mColor;
+};
+
+class PhotonMap{
+public:
+    uint64_t index;
 };
 
 /// Defiles position, orientation, type (sphere, mesh, cylinder, etc)
@@ -53,21 +58,17 @@ public:
     Material    mMaterial;
     std::string mName;
 
-    Object(const std::string&& name, const vec3& pos) :
-            mName(std::move(name)), mPos(pos) {}
+    Object(const std::string&& name, const vec3& pos, const Material& material) :
+            mName(std::move(name)), mPos(pos), mMaterial(material) {}
 
-    Object(const vec3& pos) :
-            Object("None", pos) {}
-
-
-
+    //virtual PhotonMap     getPhotonMap(vec2& uv) = 0;
     virtual IntersectInfo intersect(const Ray& ray) = 0;
 };
 
 class Sphere : public Object{
 public:
-    Sphere(std::string&& name, vec3 pos, float rad) :
-            Object(std::move(name), pos),
+    Sphere(std::string&& name, vec3 pos, const Material& material, float rad) :
+            Object(std::move(name), pos, material),
             mRad(rad),
             mRadSqr(rad * rad) {}
 
@@ -107,20 +108,26 @@ private:
         vec3 point = ray.mPos + ray.mDir * resultDistance;
         vec3 normal = glm::normalize(point - mPos);
 
+        float side = normal.z;
+        float u = std::atan2(normal.x, normal.z) / (2 * pi) + 0.5;
+        float v = std::asin(normal.y) / pi + 0.5;
+
+
         return {
             true,
             resultDistance,
             this,
             normal,
-            point + normal * offsetScalar
+            point + normal * offsetScalar,
+            vec2{u, v}
         };
     }
 };
 
 class Rectangle : public Object {
 public:
-    Rectangle(std::string&& name, vec3 pos, vec3 side1, vec3 side2) :
-            Object(std::move(name), pos),
+    Rectangle(std::string&& name, vec3 pos, const Material& material, vec3 side1, vec3 side2) :
+            Object(std::move(name), pos, material),
             mSide1Len(glm::length(side1)),
             mSide1(glm::normalize(side1)),
             mSide2Len(glm::length(side2)),
@@ -134,6 +141,7 @@ public:
     float mSide2Len;
     vec3 mNormal;
 
+    /// TODO return bool, pass info by reference
     IntersectInfo intersect(const Ray& ray) override {
         if(glm::dot(ray.mDir, mNormal) > 0) {
             return { false };
@@ -146,13 +154,17 @@ public:
 
         auto inRange = [](float v, float max){ return v >= 0 && v <= max; };
 
-        if(inRange(glm::dot(p, mSide1), mSide1Len) && inRange(glm::dot(p, mSide2), mSide2Len)) {
+        float u = glm::dot(p, mSide1);
+        float v = glm::dot(p, mSide2);
+
+        if(inRange(u, 1.0f) && inRange(v, mSide2Len)) {
             return {
                     true,
                     resultDistance,
                     this,
                     mNormal,
-                    point + offsetScalar * mNormal
+                    point + offsetScalar * mNormal,
+                    vec2{ u, v }
             };
         }
 

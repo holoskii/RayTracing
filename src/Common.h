@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/ext/scalar_constants.hpp>
@@ -7,12 +9,24 @@
 #include <iostream>
 #include <string>
 
-using mat4 = glm::mat4x4;
-using vec4 = glm::vec4;
-using vec3 = glm::vec3;
-constexpr float pi = glm::pi<float>();
 
+using vec2 = glm::vec2;
+using vec3 = glm::vec3;
+using vec4 = glm::vec4;
+using mat4 = glm::mat4x4;
 using TimePoint = std::chrono::high_resolution_clock::time_point;
+
+constexpr float pi = glm::pi<float>();
+constexpr float pi2 = glm::pi<float>() * 2.0f;
+constexpr float piDiv2 = glm::pi<float>() / 2.0f;
+
+inline float degToRad(float deg) {
+    return deg * pi / 180.0f;
+}
+
+inline float radToDeg(float rad) {
+    return rad / pi * 180.0f;
+}
 
 class Ray {
 public:
@@ -31,14 +45,6 @@ private:
     uint8_t r, g, b;
     uint8_t a;
 };
-
-inline float degToRad(float deg) {
-    return deg * pi / 180.0f;
-}
-
-inline float radToDeg(float rad) {
-    return rad / pi * 180.0f;
-}
 
 #if ENABLE_TRACE
 class FunctionTracer {
