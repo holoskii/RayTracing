@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Config.h"
-
 #include <cstdint>
+#include <vector>
 
 class Tile {
 public:

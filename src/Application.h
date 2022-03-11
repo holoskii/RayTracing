@@ -10,20 +10,25 @@
 class Application {
 public:
     Application();
-    ~Application();
+    ~Application() = default;
     void start();
     void benchmark();
 
 private:
     void startUnsafe();
+
+    /// Separates code into logic
     void setup();
     void setupGUI();
     void handleCore();
     void showBuffer();
     void renderGUI();
     void shutdown();
+
     bool isRunning();
     void restartRender();
+
+    /// Utility functions
     static bool timePassed(TimePoint& timePoint, uint64_t duration);
     static void glfwErrorCallback(int error, const char* description);
 
@@ -38,9 +43,14 @@ private:
     WLM                         mWLM;
 
     /// Render
+    bool                        mRestartRender          = false;
     RenderMode                  mNewRenderMode          = RenderMode::Fast;
     TimePoint                   mBufferUpdateTimePoint;
     TimePoint                   mRenderRestartTimePoint;
-    bool                        mRestartRender          = false;
-    bool                        mShutdown               = false;
+
+    /// ImGUI limits (sliders, etc)
+    float       objPosMin       = -50;
+    float       objPosMax       = 50;
+    float       fovMinRad       = degToRad(15);
+    float       fovMaxRad       = degToRad(150);
 };

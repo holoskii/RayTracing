@@ -3,13 +3,13 @@
 #include "Timer.h"
 #include <cstring>
 
-WLM::WLM(Config& config, Scene& scene) :
-        mConfig(config),
-        mScene(scene),
-        mCore(config, scene),
-        mWorkersReady(mConfig.threadsCount),
-        mStatus(Status::Fill),
-        mLineIndex(0) {
+WLM::WLM(Config& config, Scene& scene)
+    : mConfig(config)
+    , mScene(scene)
+    , mCore(config, scene)
+    , mWorkersReady(mConfig.threadsCount)
+    , mStatus(Status::Fill)
+    , mLineIndex(0) {
     mImageBuffer = new Pixel[mConfig.renderWidth * mConfig.renderHeight];
     mCore.setBuffer(mImageBuffer);
     for(int i = 0; i < mConfig.threadsCount; i++) {
@@ -45,6 +45,7 @@ void WLM::WLMEntryPoint() {
 
 WLM::~WLM() {
     startNewState(Status::Shutdown);
+    mWLMThread.join();
     for(auto& thread : mThreads)
         thread.join();
     delete[] mImageBuffer;

@@ -5,15 +5,16 @@
 
 #include <thread>
 
-RenderCore::RenderCore(Config& config, Scene& scene) :
-        mConfig(config),
-        mScene(scene) {}
+RenderCore::RenderCore(Config& config, Scene& scene)
+    : mConfig(config)
+    , mScene(scene) {}
 
 void RenderCore::renderTile(Tile & tile, bool & running) {
-    if(!running)
+    if(!running) {
         return;
+    }
+    // FIXME
     assert(running);
-    assert(mImageBuffer);
     if(mConfig.renderMode == RenderMode::Fast) {
         for(int i = tile.yStart; i < tile.yEnd && running; i++) {
             for(int j = tile.xStart; j < tile.xEnd && running; j++) {

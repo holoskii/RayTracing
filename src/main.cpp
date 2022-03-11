@@ -1,9 +1,7 @@
 #if 1
 
-#include "Application.h"
-
 #include "Objects.h"
-
+#include "Application.h"
 
 /// Workflow
 /// Direct renderer: Camera, object, rays, intersections
@@ -29,11 +27,9 @@
 /// https://www.teamten.com/lawrence/graphics/gamma/
 
 
-
 int main(int, char**) {
     // objectTest();
     Application app;
-    //
     // app.benchmark();
     app.start();
     return 0;

@@ -1,9 +1,9 @@
 #include "Scene.h"
 
 
-Scene::Scene(Config& config) :
-        mConfig(config),
-        mCamera(config) {
+Scene::Scene(Config& config)
+    : mConfig(config)
+    , mCamera(config) {
     mLights.emplace_back(new PointLightSource(vec3{ 0.5, 0.99, -0.5 }, vec3{1, 1, 1}, 0.75));
 
     mObjects.emplace_back(
@@ -87,10 +87,16 @@ vec3 Scene::illuminatePoint(IntersectInfo& intrInfo) {
         Ray ray = { intrInfo.point, glm::normalize(light->mPos - intrInfo.point) };
 
         for(auto& object : mObjects) {
-            IntersectInfo intersectInfo = object->intersect(ray);
-            bool replaceFinalIntrWithCurrent = intersectInfo.intersect && (finalIntr.intersect == false || finalIntr.distance > intersectInfo.distance);
+            IntersectInfo currentIntrInfo;
+            bool res = object->intersect(ray, currentIntrInfo);
+            if(!res) {
+                continue;
+            }
+            assert(currentIntrInfo.uv.x >=0 && currentIntrInfo.uv.x <= 1);
+            assert(currentIntrInfo.uv.y >=0 && currentIntrInfo.uv.y <= 1);
+            bool replaceFinalIntrWithCurrent = currentIntrInfo.intersect && (finalIntr.intersect == false || finalIntr.distance > currentIntrInfo.distance);
             if(replaceFinalIntrWithCurrent) {
-                finalIntr = intersectInfo;
+                finalIntr = currentIntrInfo;
             }
         }
         float dist = glm::distance(light->mPos, intrInfo.point);
@@ -121,7 +127,11 @@ Pixel Scene::renderPixel(uint32_t x, uint32_t y) {
     Ray ray = mCamera.getRay(mConfig, 2.0f * x / mConfig.renderWidth - 1.0f, 2.0f * y / mConfig.renderHeight - 1.0f);
     IntersectInfo finalIntr = { false };
     for(auto& obj : mObjects) {
-        IntersectInfo intersectInfo = obj->intersect(ray);
+        IntersectInfo intersectInfo;
+        bool intr = obj->intersect(ray, intersectInfo);
+        if(!intr) {
+            continue;
+        }
         bool replaceFinalIntrWithCurrent = intersectInfo.intersect && (finalIntr.intersect == false || finalIntr.distance > intersectInfo.distance);
         if(replaceFinalIntrWithCurrent) {
             finalIntr = intersectInfo;
@@ -132,12 +142,8 @@ Pixel Scene::renderPixel(uint32_t x, uint32_t y) {
         return mConfig.renderBGColor;
     }
 
-
     return colorVec3ToPix(illuminatePoint(finalIntr));
-    /*uv*/ return colorVec3ToPix(vec3{finalIntr.uv.x, finalIntr.uv.y, 0});
     /*depthe*/ return colorVec3ToPix(vec3{1,1,1} * finalIntr.distance / 5.0f);
+    /*uv*/ return colorVec3ToPix(vec3{finalIntr.uv.x, finalIntr.uv.y, 0});
     /*photon partition*/ return colorVec3ToPix(vec3{1} * (((int32_t)(finalIntr.uv.x * 10) + (int32_t)(finalIntr.uv.y * 10)) % 2 * 0.5f));
-
-    // return colorVec3ToPix(illuminatePoint(finalIntr));
-    // dirVec3ToPix(finalIntr.normal);
 }

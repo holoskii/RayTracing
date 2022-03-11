@@ -5,17 +5,16 @@
 #endif
 
 #include "Timer.h"
-#include "imgui/imgui_internal.h"
 #include <iostream>
+#include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
 
-
-Application::Application() :
-        mConfig(),
-        mScene(mConfig),
-        mWLM(mConfig, mScene) {}
+Application::Application()
+    : mConfig()
+    , mScene(mConfig)
+    , mWLM(mConfig, mScene) {}
 
 void Application::start() {
     try {
@@ -26,7 +25,6 @@ void Application::start() {
     }
 }
 
-
 void Application::shutdown() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -34,14 +32,11 @@ void Application::shutdown() {
 
     glfwDestroyWindow(mWindowGLFW);
     glfwTerminate();
-    mShutdown = true;
 }
 
 void Application::benchmark() {
     mWLM.benchmarkRender();
 }
-
-Application::~Application() {}
 
 void Application::startUnsafe() {
     setup();
@@ -62,19 +57,20 @@ bool Application::isRunning() {
 
 void Application::setup() {
     glfwSetErrorCallback(glfwErrorCallback);
-    if (!glfwInit())
+    if (!glfwInit()) {
         throw std::runtime_error("!glfwInit()");
+    }
 
     // GL 3.0 + GLSL 130
     const char* glslVersion = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-
-    mWindowGLFW = glfwCreateWindow(mConfig.windowWidth, mConfig.windowHeight, "ThesisWindow", nullptr, nullptr);
-    if (mWindowGLFW == nullptr)
+    mWindowGLFW = glfwCreateWindow(mConfig.windowWidth, mConfig.windowHeight,
+                                   "ThesisWindow", nullptr, nullptr);
+    if (mWindowGLFW == nullptr) {
         throw std::runtime_error("glfwCreateWindow == null");
-
+    }
     glfwMakeContextCurrent(mWindowGLFW);
     glfwSwapInterval(1);
 
@@ -93,9 +89,7 @@ void Application::setup() {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     glGenTextures(1, &mOpenGLTexture);
-
     glBindTexture(GL_TEXTURE_2D, mOpenGLTexture);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
@@ -117,7 +111,9 @@ void Application::setupGUI() {
     ImGui::NewFrame();
 
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
     {
+        /// Frame buffer is displayed here
         ImGui::Begin("Image");
         {
             ImGui::BeginChild("GameRender");
@@ -133,11 +129,16 @@ void Application::setupGUI() {
         ImGui::End();
     }
 
+    bool valuesChanged = false;
+
+    /// Controls happen from this panel
+    /// Draw all the GUI, restart render if any value changed
     {
         ImGui::Begin("Configuration");
+
         if (ImGui::TreeNode("Configuration")) {
-            int &selectedInt = (int &) mConfig.renderMode;
-            for (int i = 1; i < getRenderModes().size(); i++) {
+            uint64_t selectedInt = (uint64_t)mConfig.renderMode;
+            for (uint64_t i = 1; i < getRenderModes().size(); i++) {
                 if (ImGui::Selectable(getRenderModes()[i].data(), selectedInt == i)) {
                     if (selectedInt != i) {
                         restartRender();
@@ -149,46 +150,36 @@ void Application::setupGUI() {
         }
         ImGui::Spacing();
 
-
-        bool res = false;
-        static float posMin = -50;
-        static float posMax = 50;
         if (ImGui::TreeNode("Objects")) {
-            int i = 1;
+            uint32_t i = 1;
             std::stringstream ss;
             for (auto &obj: mScene.mObjects) {
-                ImGui::Text(obj->mName.c_str());
+                ImGui::Text("%s", obj->mName.c_str());
                 ss.str("");
                 ss << obj->mName << " x";
-                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x, 0.005f, &posMin, &posMax,
-                                         "%f");
+                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x,
+                                         0.005f, &objPosMin, &objPosMin, "%f");
                 ss.str("");
                 ss << obj->mName << " y";
-                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y, 0.005f, &posMin, &posMax,
-                                         "%f");
+                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y,
+                                         0.005f, &objPosMin, &objPosMin, "%f");
                 ss.str("");
                 ss << obj->mName << " z";
-                res |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z, 0.005f, &posMin, &posMax,
-                                         "%f");
+                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z,
+                                         0.005f, &objPosMin, &objPosMin, "%f");
                 i++;
                 ss.str("");
             }
-
             ImGui::TreePop();
         }
         ImGui::Spacing();
 
-
         vec3 &camPos = mScene.mCamera.mPos;
-
-        static float fovMinRad = degToRad(15);
-        static float fovMaxRad = degToRad(180);
-        static float fovDeg = radToDeg(mScene.mCamera.mFov);
         {
-            res |= ImGui::DragScalar(" Cam x", ImGuiDataType_Float, &camPos.x, 0.005f, &posMin, &posMax, "%f");
-            res |= ImGui::DragScalar(" Cam y", ImGuiDataType_Float, &camPos.y, 0.005f, &posMin, &posMax, "%f");
-            res |= ImGui::DragScalar(" Cam z", ImGuiDataType_Float, &camPos.z, 0.005f, &posMin, &posMax, "%f");
-            res |= ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f, &fovMinRad, &fovMaxRad,"%f");
+            valuesChanged |= ImGui::DragScalar(" Cam x", ImGuiDataType_Float, &camPos.x, 0.005f, &objPosMin, &objPosMin, "%f");
+            valuesChanged |= ImGui::DragScalar(" Cam y", ImGuiDataType_Float, &camPos.y, 0.005f, &objPosMin, &objPosMin, "%f");
+            valuesChanged |= ImGui::DragScalar(" Cam z", ImGuiDataType_Float, &camPos.z, 0.005f, &objPosMin, &objPosMin, "%f");
+            valuesChanged |= ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f, &fovMinRad, &fovMaxRad,"%f");
             ImGui::Spacing();
         }
 
@@ -199,15 +190,14 @@ void Application::setupGUI() {
             ImGui::Checkbox("show", &mConfig.showDebugPixel);
             ImGui::Checkbox("debug", &mConfig.debugPixel);
             ImGui::TreePop();
-        }
-        ImGui::Spacing();
-
-
-        if(res) {
-            restartRender();
+            ImGui::Spacing();
         }
 
         ImGui::End();
+    }
+
+    if(valuesChanged) {
+        restartRender();
     }
 }
 
@@ -224,8 +214,11 @@ void Application::handleCore() {
 }
 
 void Application::showBuffer() {
+    /// Cap FPS with frame time
+    /// Don't put new buffer right after restart, it'll be mostly unrendered
     if(timePassed(mBufferUpdateTimePoint, mConfig.frameUpdateTime) &&
             timePassed(mRenderRestartTimePoint, 10) ) {
+        /// Sometimes we need to debug one pixel, this routine helps to do that
         Pixel temp;
         Pixel* buf = mWLM.getImageBuffer();
         if(mConfig.showDebugPixel) {
@@ -235,6 +228,7 @@ void Application::showBuffer() {
             buf[mConfig.debugY * mConfig.renderWidth + mConfig.debugX] = {255, 0, 0};
 
         }
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int32_t) mConfig.renderWidth, (int32_t) mConfig.renderHeight,
                      0, GL_RGBA, GL_UNSIGNED_BYTE, mWLM.getImageBuffer());
 
@@ -246,15 +240,14 @@ void Application::showBuffer() {
 
 void Application::renderGUI() {
     ImGui::Render();
-    int displayWidth, displayHeight;
+    int32_t displayWidth, displayHeight;
     glfwGetFramebufferSize(mWindowGLFW, &displayWidth, &displayHeight);
     glViewport(0, 0, displayWidth, displayHeight);
-    vec4 v = mConfig.appBGColor;
-    const ImVec4& bgCol = { v.x, v.y, v.z, v.w };
+
+    vec4& bgCol = mConfig.appBGColor;
     glClearColor(bgCol.x, bgCol.y, bgCol.z, bgCol.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
     glfwSwapBuffers(mWindowGLFW);
 }
 
