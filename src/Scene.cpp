@@ -11,6 +11,7 @@ Scene::Scene(Config& config)
             "Smaller",
             vec3{0.3, 0.2, -0.5},
             Material{vec3{1}},
+            config,
             0.1
         )
     );
@@ -20,6 +21,7 @@ Scene::Scene(Config& config)
             "Bigger",
             vec3{0.7, 0.3, -0.3},
             Material{vec3{1}},
+            config,
             0.15
         )
     );
@@ -30,6 +32,7 @@ Scene::Scene(Config& config)
             "Floor",
             vec3{0,0,0},
             Material{vec3{1}},
+            config,
             vec3{1,0,0},
             vec3{0,0,-1}
         )
@@ -41,6 +44,7 @@ Scene::Scene(Config& config)
             "Ceiling",
             vec3{0,1,0},
             Material{vec3{1}},
+            config,
             vec3{0,0,-1},
             vec3{1,0,0}
         )
@@ -52,6 +56,7 @@ Scene::Scene(Config& config)
             "Back",
             vec3{0,0,-1},
             Material{vec3{0, 1, 0}},
+            config,
             vec3{1,0,0},
             vec3{0,1,0}
         )
@@ -63,6 +68,7 @@ Scene::Scene(Config& config)
             "Left",
             vec3{0,0,0},
             Material{vec3{1, 0, 0}},
+            config,
             vec3{0,0,-1},
             vec3{0,1,0}
         )
@@ -74,6 +80,7 @@ Scene::Scene(Config& config)
             "Right",
             vec3{1,0,0},
             Material{vec3{0, 0, 1 }},
+            config,
             vec3{0,1,0},
             vec3{0,0,-1}
         )
@@ -145,5 +152,7 @@ Pixel Scene::renderPixel(uint32_t x, uint32_t y) {
     return colorVec3ToPix(illuminatePoint(finalIntr));
     /*depthe*/ return colorVec3ToPix(vec3{1,1,1} * finalIntr.distance / 5.0f);
     /*uv*/ return colorVec3ToPix(vec3{finalIntr.uv.x, finalIntr.uv.y, 0});
-    /*photon partition*/ return colorVec3ToPix(vec3{1} * (((int32_t)(finalIntr.uv.x * 10) + (int32_t)(finalIntr.uv.y * 10)) % 2 * 0.5f));
+    /*photon partition*/ return colorVec3ToPix(vec3{
+            std::floor(finalIntr.uv.x * finalIntr.object->mUSize) / finalIntr.object->mUSize,
+            std::floor(finalIntr.uv.y * finalIntr.object->mVSize) / finalIntr.object->mVSize,0 });
 }

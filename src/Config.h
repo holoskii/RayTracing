@@ -30,8 +30,9 @@ public:
     uint32_t    renderHeight    = 1080 * renderScale;
     Pixel       renderBGColor   = { 74, 75, 82 };
     uint32_t    frameUpdateTime = 30;
-    uint32_t    threadsCount    = 30;
+    uint32_t    threadsCount    = 1;
     uint32_t    tileSize        = 128;
+    float       photonRadius    = 0.05f;  // Radius, at which photons are used. Defines grid size
 
     /// Camera
     float       fov             = pi / 4;

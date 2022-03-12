@@ -9,13 +9,13 @@ bool Sphere::intersect(const Ray& ray, IntersectInfo& finalIntersect) {
     float adjSide = glm::dot(hypotenuse, ray.mDir);
     // Pointing another direction
     if (adjSide < 0) {
-    return false;
+        return false;
     }
     // Pythagorean  theorem
     float oppositeSide = glm::dot(hypotenuse, hypotenuse) - adjSide * adjSide;
     // Out of sphere radius
     if (oppositeSide > mRadSqr) {
-    return false;
+        return false;
     }
     // Distance from intersection point and opposite side
     float dist = sqrtf(mRadSqr - oppositeSide);
@@ -23,10 +23,10 @@ bool Sphere::intersect(const Ray& ray, IntersectInfo& finalIntersect) {
     // Distance from ray origin to intersection point
     float resultDistance = adjSide - dist;
     if(resultDistance < 0) {
-    resultDistance = adjSide + dist;
+        resultDistance = adjSide + dist;
     }
     if(resultDistance < 0) {
-    return false;
+        return false;
     }
 
     vec3 point = ray.mPos + ray.mDir * resultDistance;
@@ -63,8 +63,12 @@ bool Rectangle::intersect(const Ray& ray, IntersectInfo& finalIntersect) {
     float v = glm::dot(p, mSide2) / mSide2Len;
 
     if(!inRange(u, 1.0f) || !inRange(v, 1.0f)) {
-    return false;
+        return false;
     }
+
+    // u or v can't be exactly 1
+    u = std::min(u, 0.999f);
+    v = std::min(v, 0.999f);
 
     finalIntersect = {
         true,

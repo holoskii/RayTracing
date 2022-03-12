@@ -27,7 +27,7 @@ public:
 
 private:
     enum class Status { Idle, Fill, Render, Shutdown };
-    enum class Job { Idle, StartRender, RestartRender };
+    enum class Job { Idle, StartRender, RestartRender, Shutdown };
 
     void workerEntryPoint(uint64_t threadId);
     void WLMEntryPoint();

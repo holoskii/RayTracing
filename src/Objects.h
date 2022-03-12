@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "Config.h"
 #include <iostream>
+#include <vector>
 
 class Object;
 
@@ -46,28 +47,45 @@ public:
     vec3 mColor;
 };
 
+class Photon {
+    vec3 pos;
+};
+
 /// Defiles position, orientation, type (sphere, mesh, cylinder, etc)
 /// have to check if the object intersects with the ray
 class Object {
 public:
-    vec3        mPos;
-    Material    mMaterial;
-    std::string mName;
+    vec3                    mPos;
+    Material                mMaterial;
+    std::string             mName;
+    Config&                 mConfig;
 
-    Object(const std::string&& name, const vec3& pos, const Material& material)
-        : mName(std::move(name))
+    uint32_t                mUSize;
+    uint32_t                mVSize;
+    std::vector<std::vector<std::vector<Photon>>> mPhotonGrid; // order: u grid, v grid, vector with photons
+
+    Object(std::string& name, const vec3& pos, Material material, Config& config)
+        : mName(name)
         , mPos(pos)
-        , mMaterial(material) {}
+        , mMaterial(material)
+        , mConfig(config) {}
 
     virtual bool intersect(const Ray& ray, IntersectInfo& finalIntersect) = 0;
 };
 
 class Sphere : public Object{
 public:
-    Sphere(std::string&& name, vec3 pos, const Material& material, float rad)
-        : Object(std::move(name), pos, material)
+    Sphere(std::string name, vec3 pos, const Material& material, Config& config, float rad)
+        : Object(name, pos, material, config)
         , mRad(rad)
-        , mRadSqr(rad * rad) {}
+        , mRadSqr(rad * rad) {
+        mUSize = std::ceil((2 * pi * rad) / (mConfig.photonRadius * 2));
+        mVSize = mUSize;
+        mPhotonGrid.resize(mUSize);
+        for(auto& v : mPhotonGrid) {
+            v.resize(mVSize);
+        }
+    }
 
 private:
     float mRad;
@@ -78,14 +96,20 @@ private:
 
 class Rectangle : public Object {
 public:
-    Rectangle(std::string&& name, vec3 pos, const Material& material, vec3 side1, vec3 side2)
-        : Object(std::move(name), pos, material)
+    Rectangle(std::string name, vec3 pos, const Material& material, Config& config, vec3 side1, vec3 side2)
+        : Object(name, pos, material, config)
         , mSide1Len(glm::length(side1))
         , mSide1(glm::normalize(side1))
         , mSide2Len(glm::length(side2))
-        , mSide2(glm::normalize(side2)) {
-        mNormal = glm::cross(side1, side2);
-    }
+        , mSide2(glm::normalize(side2))
+        , mNormal(glm::cross(side1, side2)) {
+        mUSize = std::ceil(mSide1Len / (mConfig.photonRadius * 2));
+        mVSize = std::ceil(mSide2Len / (mConfig.photonRadius * 2));
+        mPhotonGrid.resize(mUSize);
+        for(auto& v : mPhotonGrid) {
+            v.resize(mVSize);
+        }
+     }
 
     vec3 mNormal;
     vec3 mSide1;

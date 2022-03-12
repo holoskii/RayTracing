@@ -22,9 +22,10 @@ WLM::WLM(Config& config, Scene& scene)
 void WLM::WLMEntryPoint() {
     startNewState(Status::Fill);
     while(mStatus != Status::Shutdown) {
-        std::unique_lock<std::mutex> lk(mMutexWLM);
-        mCVWLM.wait(lk);
-
+        {
+            std::unique_lock<std::mutex> lk(mMutexWLM);
+            mCVWLM.wait(lk);
+        }
         switch (mNextJob) {
             case Job::StartRender: {
                 startNewState(Status::Render);
@@ -36,15 +37,17 @@ void WLM::WLMEntryPoint() {
                 startNewState(Status::Render);
                 break;
             }
-            default: {
+            case Job::Shutdown: {
+                startNewState(Status::Shutdown);
                 break;
             }
+            default: break;
         }
     }
 }
 
 WLM::~WLM() {
-    startNewState(Status::Shutdown);
+    setNextJob(Job::Shutdown);
     mWLMThread.join();
     for(auto& thread : mThreads)
         thread.join();

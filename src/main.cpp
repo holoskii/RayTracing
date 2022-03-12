@@ -15,6 +15,12 @@
 /// Upon intersection camera rays will gather information
 ///     from photon maps they hit
 
+/// How can we store photons:
+/// In 3d grid. To use it we need to check all photons in 27 cubes
+/// UV grid in each object. Faster search, need to check only 9 squares
+/// -> Lets go -> Save UV grid and turn it into map(like texture, normal, etc). Very fast search,
+/// But map have to be recalculated with each radius change.
+
 /// FIXME
 /// -O2 -ffast-math -mtune=native -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 
