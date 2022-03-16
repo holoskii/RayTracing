@@ -7,9 +7,9 @@
 #define ENABLE_TIMERS   true
 #define ENABLE_TRACE    false
 
-enum class RenderMode { Fast = 1, Slow = 2, Advanced = 3 };
+enum class RenderMode { Simple = 1, Slow = 2, Advanced = 3 };
 static constexpr std::array<std::string_view, 4> getRenderModes() {
-    return { "", "Fast", "Slow", "Advanced" };
+    return { "", "Simple", "Slow", "Advanced" };
 }
 
 
@@ -30,7 +30,7 @@ public:
     uint32_t    renderHeight    = 1080 * renderScale;
     Pixel       renderBGColor   = { 74, 75, 82 };
     uint32_t    frameUpdateTime = 30;
-    uint32_t    threadsCount    = 1;
+    uint32_t    threadsCount    = 4;
     uint32_t    tileSize        = 128;
     float       photonRadius    = 0.05f;  // Radius, at which photons are used. Defines grid size
 

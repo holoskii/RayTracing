@@ -4,7 +4,14 @@
 Scene::Scene(Config& config)
     : mConfig(config)
     , mCamera(config) {
-    mLights.emplace_back(new PointLightSource(vec3{ 0.5, 0.99, -0.5 }, vec3{1, 1, 1}, 0.75));
+    mLights.emplace_back(
+        new PointLightSource(
+            vec3{ 0.5, 0.99, -0.5 },
+            vec3{1, 1, 1},
+            0.75,
+            "Point light"
+        )
+    );
 
     mObjects.emplace_back(
         new Sphere(

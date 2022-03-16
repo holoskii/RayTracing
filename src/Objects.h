@@ -126,18 +126,20 @@ public:
     vec3 mPos;
     vec3 mColor;
     float mLuminosity;
+    std::string mName;
 
-    LightSource(vec3 pos, vec3 color, float luminosity)
+    LightSource(vec3 pos, vec3 color, float luminosity, std::string name)
         : mPos(pos)
         , mColor(color)
-        , mLuminosity(luminosity) {}
+        , mLuminosity(luminosity)
+        , mName(name) {}
 };
 
 /// "Invisible", can't be intersected with the ray
 class PointLightSource : public LightSource {
 public:
-    PointLightSource(vec3 pos, vec3 color, float luminosity)
-        : LightSource(pos, color, luminosity) {}
+    PointLightSource(vec3 pos, vec3 color, float luminosity, std::string name)
+        : LightSource(pos, color, luminosity, name) {}
 };
 
 

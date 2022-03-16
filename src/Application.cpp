@@ -147,44 +147,72 @@ void Application::setupGUI() {
                 }
             }
             ImGui::TreePop();
-        }
-        ImGui::Spacing();
-
-        if (ImGui::TreeNode("Objects")) {
-            uint32_t i = 1;
-            std::stringstream ss;
-            for (auto &obj: mScene.mObjects) {
-                ImGui::Text("%s", obj->mName.c_str());
-                ss.str("");
-                ss << obj->mName << " x";
-                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x,
-                                         0.005f, &objPosMin, &objPosMin, "%f");
-                ss.str("");
-                ss << obj->mName << " y";
-                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y,
-                                         0.005f, &objPosMin, &objPosMin, "%f");
-                ss.str("");
-                ss << obj->mName << " z";
-                valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z,
-                                         0.005f, &objPosMin, &objPosMin, "%f");
-                i++;
-                ss.str("");
-            }
-            ImGui::TreePop();
-        }
-        ImGui::Spacing();
-
-        vec3 &camPos = mScene.mCamera.mPos;
-        {
-            valuesChanged |= ImGui::DragScalar(" Cam x", ImGuiDataType_Float, &camPos.x, 0.005f, &objPosMin, &objPosMin, "%f");
-            valuesChanged |= ImGui::DragScalar(" Cam y", ImGuiDataType_Float, &camPos.y, 0.005f, &objPosMin, &objPosMin, "%f");
-            valuesChanged |= ImGui::DragScalar(" Cam z", ImGuiDataType_Float, &camPos.z, 0.005f, &objPosMin, &objPosMin, "%f");
-            valuesChanged |= ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f, &fovMinRad, &fovMaxRad,"%f");
             ImGui::Spacing();
         }
 
-        if (ImGui::TreeNode("Debug"))
-        {
+        if (ImGui::TreeNode("Entities")) {
+            uint32_t i = 1;
+            std::stringstream ss;
+            ImGui::Text("Objects");
+            for (auto &obj: mScene.mObjects) {
+                if (ImGui::TreeNode( obj->mName.c_str())) {
+                    ss.str("");
+                    ss << obj->mName << " x";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x,
+                                             0.005f, &objPosMin, &objPosMin, "%f");
+                    ss.str("");
+                    ss << obj->mName << " y";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y,
+                                             0.005f, &objPosMin, &objPosMin, "%f");
+                    ss.str("");
+                    ss << obj->mName << " z";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z,
+                                             0.005f, &objPosMin, &objPosMin, "%f");
+                    i++;
+                    ss.str("");
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::Text("Light sources");
+            for (auto &obj: mScene.mLights) {
+                if (ImGui::TreeNode( obj->mName.c_str())) {
+                    ss.str("");
+                    ss << obj->mName << " x";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.x,
+                                                       0.005f, &objPosMin, &objPosMin, "%f");
+                    ss.str("");
+                    ss << obj->mName << " y";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.y,
+                                                       0.005f, &objPosMin, &objPosMin, "%f");
+                    ss.str("");
+                    ss << obj->mName << " z";
+                    valuesChanged |= ImGui::DragScalar(ss.str().c_str(), ImGuiDataType_Float, &obj->mPos.z,
+                                                       0.005f, &objPosMin, &objPosMin, "%f");
+                    i++;
+                    ss.str("");
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+            ImGui::Spacing();
+        }
+
+        if (ImGui::TreeNode("Camera")) {
+            vec3 &camPos = mScene.mCamera.mPos;
+            {
+                valuesChanged |= ImGui::DragScalar(" Cam x", ImGuiDataType_Float, &camPos.x, 0.005f, &objPosMin, &objPosMin, "%f");
+                valuesChanged |= ImGui::DragScalar(" Cam y", ImGuiDataType_Float, &camPos.y, 0.005f, &objPosMin, &objPosMin, "%f");
+                valuesChanged |= ImGui::DragScalar(" Cam z", ImGuiDataType_Float, &camPos.z, 0.005f, &objPosMin, &objPosMin, "%f");
+                valuesChanged |= ImGui::DragScalar(" FOV", ImGuiDataType_Float, &mScene.mCamera.mFov, 0.005f, &fovMinRad, &fovMaxRad,"%f");
+                ImGui::Spacing();
+            }
+            ImGui::TreePop();
+            ImGui::Spacing();
+        }
+
+
+        if (ImGui::TreeNode("Debug")) {
             ImGui::InputInt("x", &mConfig.debugX);
             ImGui::InputInt("y", &mConfig.debugY);
             ImGui::Checkbox("show", &mConfig.showDebugPixel);

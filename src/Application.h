@@ -44,7 +44,7 @@ private:
 
     /// Render
     bool                        mRestartRender          = false;
-    RenderMode                  mNewRenderMode          = RenderMode::Fast;
+    RenderMode                  mNewRenderMode          = RenderMode::Simple;
     TimePoint                   mBufferUpdateTimePoint;
     TimePoint                   mRenderRestartTimePoint;
 
